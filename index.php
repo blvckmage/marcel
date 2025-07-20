@@ -13,6 +13,7 @@ if (file_exists($products_file)) {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>3D Маркетплейс</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
@@ -120,6 +121,18 @@ if (file_exists($products_file)) {
             .wb-card-img { height: 160px; }
             .wb-list-card { flex-direction: column; align-items: flex-start; padding: 12px 8px; gap: 10px; }
             .wb-list-btns { margin-left: 0; margin-top: 10px; }
+            .wb-filters { flex-direction: column; align-items: stretch; gap: 8px; }
+            .view-toggle-group { width: 100%; }
+            .view-toggle-btn { width: 50%; min-width: 120px; }
+            .wb-search { width: 100% !important; min-width: 0; }
+            .form-select { width: 100% !important; }
+            .navbar .navbar-brand { font-size: 1.2rem; }
+            .wb-cart-btn { padding: 8px 12px; font-size: 1rem; }
+            .footer-contacts { font-size: 0.95em; }
+            .footer-socials a { font-size: 1.2em; }
+        }
+        @media (max-width: 600px) {
+            .view-toggle-group { display: none !important; }
         }
         ::selection {
           background: #ff6a00;

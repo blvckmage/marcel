@@ -128,17 +128,6 @@ if ($chat_id) {
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid" style="max-width:1200px;margin:0 auto;">
-    <a class="navbar-brand" href="index.php">3D Print</a>
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap:18px;">
-      <li class="nav-item"><a class="nav-link" href="index.php">Каталог</a></li>
-      <li class="nav-item"><a class="nav-link" href="cart.php">Корзина</a></li>
-      <li class="nav-item"><a class="nav-link" href="order.php">Оформление</a></li>
-      <li class="nav-item"><a class="nav-link" href="admin.php">Админка</a></li>
-    </ul>
-  </div>
-</nav>
 <div class="bee-bg"></div>
 <div class="wb-header">
     <div class="container">

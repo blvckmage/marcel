@@ -13,6 +13,7 @@ if (file_exists($products_file)) {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Оформление заказа — 3D Маркетплейс</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
@@ -85,15 +86,29 @@ if (file_exists($products_file)) {
         ::selection { background: #ff6a00; color: #fff; }
         footer { background: #f7f7f9; color: #888; text-align: center; padding: 24px 0 12px 0; font-size: 1rem; border-top: 1px solid #e5e5e5; }
         footer a { color: #ff6a00; text-decoration: none; }
+        @media (max-width: 600px) {
+          .order-cart-card { flex-direction: column; align-items: flex-start; padding: 12px 8px; gap: 10px; }
+          .order-cart-info { width: 100%; }
+          .order-summary { padding: 12px 8px; font-size: 1.05rem; flex-direction: column; align-items: flex-start; }
+          .order-form { padding: 12px 8px; max-width: 98vw; }
+          .order-form input, .order-form label { font-size: 1rem; }
+          .order-back-btn { width: 100%; margin-top: 10px; }
+          .navbar .container-fluid { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
+          .navbar .navbar-brand { font-size: 1.2rem; margin-bottom: 0; }
+          .nav-link.catalog { font-size: 1.1rem; margin-left: 0; }
+          .wb-cart-btn { margin-left: 0 !important; padding: 8px 12px; font-size: 1rem; }
+          .footer-contacts { font-size: 0.95em; }
+          .footer-socials a { font-size: 1.2em; }
+        }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg">
-  <div class="container-fluid" style="max-width:1200px;margin:0 auto;">
-    <a class="navbar-brand" href="index.php">3D Print</a>
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap:18px;">
-      <li class="nav-item"><a class="nav-link catalog active" href="index.php">Каталог</a></li>
-    </ul>
+  <div class="container-fluid" style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:18px;">
+      <a class="navbar-brand" href="index.php">3D Print</a>
+      <a class="nav-link catalog active" href="index.php" style="font-weight:800;color:#ff6a00;">Каталог</a>
+    </div>
     <a href="cart.php" class="wb-cart-btn position-relative ms-auto" id="cart-btn" style="margin-left:auto;">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff6a00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         <span id="cart-count" class="badge bg-light text-dark ms-1">0</span>
@@ -101,16 +116,6 @@ if (file_exists($products_file)) {
   </div>
 </nav>
 <div class="bee-bg"></div>
-<div class="wb-header">
-    <div class="container">
-        <span class="wb-logo">
-            3D Print
-        </span>
-        <a href="cart.php" class="wb-cart-btn position-relative">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="5" y="9" width="18" height="12" rx="3" stroke="#181818" stroke-width="2"/><path d="M9 9V7a5 5 0 0 1 10 0v2" stroke="#181818" stroke-width="2" stroke-linecap="round"/></svg>
-        </a>
-    </div>
-</div>
 <div class="container">
     <h2 class="mb-4">Оформление заказа</h2>
     <div id="order-cart"></div>

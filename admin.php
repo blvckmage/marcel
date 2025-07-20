@@ -302,6 +302,7 @@ function sort_link($label, $field, $tab, $sort, $order) {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Админ-панель — 3D Маркетплейс</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
@@ -492,17 +493,68 @@ function sort_link($label, $field, $tab, $sort, $order) {
             color: #222;
             vertical-align: middle;
         }
+        @media (max-width: 600px) {
+          .admin-add-form .row { flex-direction: column; gap: 10px; }
+          .admin-add-form .col-md-3, .admin-add-form .col-md-2, .admin-add-form .col-md-4 { width: 100%; max-width: 100%; }
+          .admin-add-form input, .admin-add-form label, .admin-add-form textarea { font-size: 1rem; }
+          .admin-toggle-group { flex-direction: column; width: 100%; }
+          .admin-toggle-btn { width: 100%; min-width: 120px; }
+          .navbar .container-fluid { flex-direction: column; align-items: flex-start; }
+          .navbar .navbar-brand { font-size: 1.2rem; }
+          .footer-contacts { font-size: 0.95em; }
+          .footer-socials a { font-size: 1.2em; }
+          .table-responsive { width: 100%; overflow-x: auto; }
+          table { min-width: 600px; }
+        }
+        @media (max-width: 600px) {
+            .admin-login-box {
+                max-width: 98vw;
+                margin: 24px auto 0 auto;
+                padding: 18px 6vw 18px 6vw;
+            }
+            .admin-login-box h2 {
+                font-size: 1.2rem;
+                margin-bottom: 18px;
+            }
+            .admin-login-box input[type="password"] {
+                font-size: 1rem;
+                padding: 8px 10px;
+            }
+            .admin-login-box .btn-primary,
+            .admin-login-box .btn-secondary {
+                font-size: 1rem;
+                padding: 10px 0;
+                width: 100%;
+                margin: 0 0 10px 0;
+            }
+            .admin-login-box .d-flex { flex-direction: column !important; gap: 0 !important; }
+            footer { font-size: 0.95rem; padding: 16px 0 8px 0; position: static; }
+        }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg">
-  <div class="container-fluid" style="max-width:1200px;margin:0 auto;">
-    <a class="navbar-brand" href="index.php">3D Print</a>
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap:18px;">
-      <li class="nav-item"><a class="nav-link catalog active" href="index.php">Каталог</a></li>
-    </ul>
+  <div class="container-fluid" style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:18px;">
+      <a class="navbar-brand" href="index.php">3D Print</a>
+      <a class="nav-link catalog active" href="index.php" style="font-weight:800;color:#ff6a00;margin-left:18px;">Каталог</a>
+    </div>
+    <a href="admin.php?logout=1" class="btn btn-outline-danger d-none d-sm-inline-block" id="logout-desktop" style="font-weight:600;border-radius:12px;">Выйти</a>
+    <a href="admin.php?logout=1" class="btn btn-outline-danger d-inline-block d-sm-none ms-2" id="logout-mobile" style="font-weight:600;border-radius:12px;">Выйти</a>
   </div>
 </nav>
+<style>
+@media (max-width: 600px) {
+  .navbar .container-fluid { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
+  .navbar .navbar-brand { font-size: 1.2rem; margin-bottom: 0; }
+  .nav-link.catalog { font-size: 1.1rem; margin-left: 12px !important; }
+  #logout-desktop { display: none !important; }
+  #logout-mobile { display: inline-block !important; margin-left: 8px; }
+}
+@media (min-width: 601px) {
+  #logout-mobile { display: none !important; }
+}
+</style>
 <div class="container mt-4">
     <div class="admin-toggle-group mb-4">
         <a href="admin.php?tab=orders" class="admin-toggle-btn<?php if ($tab === 'orders') echo ' active'; ?>">Заявки</a>
@@ -617,41 +669,43 @@ function sort_link($label, $field, $tab, $sort, $order) {
             document.getElementById('add-img-file-name').textContent = fileName;
         });
         </script>
-        <table class="table table-bordered table-hover align-middle">
-            <thead class="table-light">
-            <tr>
-                <th>#</th>
-                <th>Фото</th>
-                <th><?php echo sort_link('Название', 'name', $tab, $sort, $order); ?></th>
-                <th><?php echo sort_link('Цена', 'price', $tab, $sort, $order); ?></th>
-                <th>Картинка</th>
-                <th>Описание</th>
-                <th>Действия</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($products as $i => $p): ?>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
                 <tr>
-                    <form method="post" enctype="multipart/form-data" class="align-middle">
-                        <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
-                        <td><?php echo $i + 1; ?></td>
-                        <td><?php if ($p['img']): ?><img src="<?php echo htmlspecialchars($p['img']); ?>" class="preview-img" alt="img"><?php endif; ?></td>
-                        <td><input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($p['name']); ?>" required></td>
-                        <td><input type="number" name="price" class="form-control" value="<?php echo number_format($p['price'], 0, '', ' '); ?>" min="1" required></td>
-                        <td>
-                            <input type="file" name="img_file" class="form-control mb-1" accept="image/*">
-                            <input type="text" name="img" class="form-control mb-1" value="<?php echo htmlspecialchars($p['img']); ?>" placeholder="URL или путь (если не загружаете файл)">
-                        </td>
-                        <td><textarea name="description" class="form-control" rows="2" placeholder="Описание"><?php echo htmlspecialchars($p['description'] ?? ''); ?></textarea></td>
-                        <td class="d-flex gap-2">
-                            <button type="submit" name="edit_product" class="btn btn-sm btn-outline-primary">Сохранить</button>
-                            <button type="submit" name="delete_product" class="btn btn-sm btn-danger" onclick="return confirm('Удалить товар?');">Удалить</button>
-                        </td>
-                    </form>
+                    <th>#</th>
+                    <th>Фото</th>
+                    <th><?php echo sort_link('Название', 'name', $tab, $sort, $order); ?></th>
+                    <th><?php echo sort_link('Цена', 'price', $tab, $sort, $order); ?></th>
+                    <th>Картинка</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
                 </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                <?php foreach ($products as $i => $p): ?>
+                    <tr>
+                        <form method="post" enctype="multipart/form-data" class="align-middle">
+                            <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
+                            <td><?php echo $i + 1; ?></td>
+                            <td><?php if ($p['img']): ?><img src="<?php echo htmlspecialchars($p['img']); ?>" class="preview-img" alt="img"><?php endif; ?></td>
+                            <td><input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($p['name']); ?>" required></td>
+                            <td><input type="number" name="price" class="form-control" value="<?php echo number_format($p['price'], 0, '', ' '); ?>" min="1" required></td>
+                            <td>
+                                <input type="file" name="img_file" class="form-control mb-1" accept="image/*">
+                                <input type="text" name="img" class="form-control mb-1" value="<?php echo htmlspecialchars($p['img']); ?>" placeholder="URL или путь (если не загружаете файл)">
+                            </td>
+                            <td><textarea name="description" class="form-control" rows="2" placeholder="Описание"><?php echo htmlspecialchars($p['description'] ?? ''); ?></textarea></td>
+                            <td class="d-flex gap-2">
+                                <button type="submit" name="edit_product" class="btn btn-sm btn-outline-primary">Сохранить</button>
+                                <button type="submit" name="delete_product" class="btn btn-sm btn-danger" onclick="return confirm('Удалить товар?');">Удалить</button>
+                            </td>
+                        </form>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     <?php endif; ?>
 </div>
 <footer>
