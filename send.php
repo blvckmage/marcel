@@ -59,96 +59,178 @@ if ($chat_id) {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Заявка отправлена — 3D Маркетплейс</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Заявка отправлена — rusEFI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --rusefi-orange: #ff7a1a;
+            --rusefi-dark: #232629;
+            --rusefi-card: #282b2f;
+            --rusefi-text: #fff;
+            --rusefi-accent: #ff7a1a;
+        }
         body {
-            background: #f7f7f9;
-            color: #222;
-            font-family: 'Inter', Arial, sans-serif;
+            background: var(--rusefi-dark);
+            color: var(--rusefi-text);
+            font-family: 'Inter', Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        .navbar {
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
-            box-shadow: 0 2px 8px #eee;
+        .rusefi-header {
+            background: var(--rusefi-orange);
+            color: #181818;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 36px;
         }
-        .navbar .navbar-brand {
-            color: #ff6a00;
-            font-weight: 800;
-            font-size: 1.6rem;
-            letter-spacing: -1px;
+        .rusefi-logo {
+            font-size: 2.1rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            color: #181818;
+            font-family: 'Inter', Arial, Helvetica, sans-serif;
         }
-        .navbar .nav-link {
-            color: #222;
-            font-weight: 500;
-            margin: 0 12px;
-            border-bottom: 2px solid transparent;
-            transition: border .2s, color .2s;
+        .rusefi-header-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
         }
-        .navbar .nav-link:hover {
-            color: #ff6a00;
-            border-bottom: 2px solid #ff6a00;
+        .rusefi-header-menu a {
+            color: #181818;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            padding: 0 8px;
+            transition: color 0.18s;
+            cursor: pointer;
         }
-        .wb-header {
-            background: #fff;
-            color: #222;
-            padding: 18px 0 14px 0;
-            border-radius: 0 0 18px 18px;
-            margin-bottom: 32px;
-            box-shadow: 0 2px 8px #eee;
+        .rusefi-header-menu a:hover {
+            color: #fff;
+        }
+        .rusefi-cart {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #181818;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
             position: relative;
-            overflow: hidden;
         }
-        .wb-header .container { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
-        .wb-logo { font-size: 2rem; font-weight: 800; letter-spacing: -2px; color: #ff6a00; text-shadow: none; display: flex; align-items: center; gap: 10px; }
-        .wb-cart-btn { background: #232323; color: var(--rusefi-accent); border-radius: 50px; font-weight: 600; box-shadow: 0 2px 8px #111a; border: 2px solid var(--rusefi-accent); display: flex; align-items: center; gap: 8px; padding: 8px 22px; font-size: 1.1rem; transition: background .2s, color .2s, border .2s; }
-        .wb-cart-btn:hover { background: var(--rusefi-accent); color: #232323; border-color: #fff; }
-        .wb-cart-btn svg { width: 22px; height: 22px; }
-        .success-block { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #eee; padding: 32px 32px 24px 32px; max-width: 480px; margin: 48px auto 0 auto; text-align: center; border: 1px solid #e5e5e5; }
-        .success-block h1 { color: #ff6a00; font-weight: 800; margin-bottom: 18px; }
-        .success-block p { font-size: 1.15rem; margin-bottom: 24px; color: #222; }
-        .success-block .btn-primary { background: #ff6a00 !important; border: none; border-radius: 8px; font-weight: 600; font-size: 1.1rem; padding: 10px 32px; color: #fff; }
-        .success-block .btn-primary:hover { background: #e55a00 !important; color: #fff; }
+        .rusefi-cart svg {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: #181818;
+            stroke-width: 2;
+        }
+        .rusefi-cart-count {
+            background: #fff;
+            color: #181818;
+            border-radius: 50%;
+            font-size: 0.95em;
+            font-weight: 700;
+            min-width: 22px;
+            min-height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            border: 2px solid var(--rusefi-orange);
+        }
+        .rusefi-main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 36px 16px 32px 16px;
+        }
+        .rusefi-title {
+            text-align: center;
+            font-size: 2.6rem;
+            font-weight: 900;
+            margin-bottom: 32px;
+            color: #fff;
+        }
+        .success-block {
+            background: var(--rusefi-card);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #18181822;
+            padding: 48px 32px 32px 32px;
+            max-width: 480px;
+            margin: 48px auto 0 auto;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .success-block h1 { color: var(--rusefi-accent); font-weight: 800; margin-bottom: 18px; }
+        .success-block p { font-size: 1.15rem; margin-bottom: 24px; color: #fff; }
+        .success-block .btn-primary {
+            background: var(--rusefi-orange);
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            padding: 14px 0;
+            color: #181818;
+            width: 100%;
+            margin-top: 18px;
+            transition: background 0.18s, color 0.18s;
+        }
+        .success-block .btn-primary:hover { background: #ff9a4d; color: #fff; }
         @media (max-width: 600px) {
+            .rusefi-header { padding: 0 10px; height: 48px; }
+            .rusefi-logo { font-size: 1.3rem; }
+            .rusefi-title { font-size: 1.5rem; margin-bottom: 18px; }
+            .rusefi-main { padding: 18px 2vw 18px 2vw; }
             .success-block { padding: 18px 8px 12px 8px; }
         }
-        .btn, .btn-primary, .btn-outline-primary, .wb-cart-btn {
-            background: var(--rusefi-accent) !important;
-            color: #181818 !important;
-            border: none;
-        }
-        .btn:hover, .btn-primary:hover, .btn-outline-primary:hover, .wb-cart-btn:hover {
-            background: #e07c00 !important;
-            color: #181818 !important;
-        }
-        ::selection { background: #ff6a00; color: #fff; }
-        footer { background: #f7f7f9; color: #888; text-align: center; padding: 24px 0 12px 0; font-size: 1rem; border-top: 1px solid #e5e5e5; }
-        footer a { color: #ff6a00; text-decoration: none; }
     </style>
 </head>
 <body>
-<div class="bee-bg"></div>
-<div class="wb-header">
-    <div class="container">
-        <span class="wb-logo">
-            3D Print
-        </span>
-        <a href="cart.php" class="wb-cart-btn position-relative">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="5" y="9" width="18" height="12" rx="3" stroke="#ff9800" stroke-width="2"/><path d="M9 9V7a5 5 0 0 1 10 0v2" stroke="#ff9800" stroke-width="2" stroke-linecap="round"/></svg>
+    <header class="rusefi-header">
+        <span class="rusefi-logo">rusEFI</span>
+        <nav class="rusefi-header-menu">
+            <a href="index.php">Магазин</a>
+            <a href="#footer-contacts" id="contacts-link">Контакты</a>
+        </nav>
+        <a href="cart.php" class="rusefi-cart">
+            <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span id="cart-count" class="rusefi-cart-count">0</span>
         </a>
-    </div>
-</div>
-<div class="container">
-    <div class="success-block">
-        <h1>Заявка отправлена</h1>
-        <p>Спасибо! Ваша заявка принята. Мы свяжемся с вами в ближайшее время.</p>
-        <a href="index.php" class="btn btn-primary">Вернуться в каталог</a>
-    </div>
-</div>
-<footer>
-  &copy; <?php echo date('Y'); ?> 3D Print &mdash; <a href="https://www.shop.rusefi.com">rusefi.com</a>
-</footer>
-<script>localStorage.removeItem('cart');</script>
+    </header>
+    <main class="rusefi-main">
+        <div class="success-block">
+            <h1>Заявка отправлена</h1>
+            <p>Спасибо! Ваша заявка принята. Мы свяжемся с вами в ближайшее время.</p>
+            <a href="index.php" class="btn btn-primary">Вернуться в магазин</a>
+        </div>
+    </main>
+    <footer id="footer-contacts" style="background:#232629;color:#bbb;text-align:center;padding:24px 0 12px 0;font-size:1rem;border-top:1px solid #333;">
+        <div style="margin-bottom:8px;font-size:1.15em;">
+            Телефон для связи: <a href="tel:+77001234567" style="color:#ff7a1a;">+7 (700) 123-45-67</a>
+        </div>
+        &copy; <?php echo date('Y'); ?> rusEFI — <a href="https://www.shop.rusefi.com" style="color:#ff7a1a;">rusefi.com</a>
+    </footer>
+    <script>
+    function getCart() { return JSON.parse(localStorage.getItem('cart') || '{}'); }
+    function updateCartUI() {
+        const cart = getCart();
+        let count = 0;
+        for (let id in cart) count += cart[id];
+        document.getElementById('cart-count').textContent = count;
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartUI();
+        document.getElementById('contacts-link').onclick = function(e) {
+            e.preventDefault();
+            document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
+        };
+        localStorage.removeItem('cart');
+    });
+    window.addEventListener('storage', function() { updateCartUI(); });
+    </script>
 </body>
 </html> 

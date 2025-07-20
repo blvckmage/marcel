@@ -17,92 +17,141 @@ if (!isset($_SESSION['admin'])) {
     <html lang="ru">
     <head>
         <meta charset="UTF-8">
-        <title>Вход в админ-панель</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Вход в админ-панель — rusEFI</title>
         <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
         <style>
+            :root {
+                --rusefi-orange: #ff7a1a;
+                --rusefi-dark: #232629;
+                --rusefi-card: #282b2f;
+                --rusefi-text: #fff;
+                --rusefi-accent: #ff7a1a;
+            }
             body {
-                background: #f7f7f9;
-                color: #222;
-                font-family: 'Inter', Arial, sans-serif;
-                min-height: 100vh;
+                background: var(--rusefi-dark);
+                color: var(--rusefi-text);
+                font-family: 'Inter', Arial, Helvetica, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .rusefi-header {
+                background: var(--rusefi-orange);
+                color: #181818;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 36px;
+            }
+            .rusefi-logo {
+                font-size: 2.1rem;
+                font-weight: 900;
+                letter-spacing: -2px;
+                color: #181818;
+                font-family: 'Inter', Arial, Helvetica, sans-serif;
+            }
+            .rusefi-header-menu {
+                display: flex;
+                align-items: center;
+                gap: 32px;
+            }
+            .rusefi-header-menu a {
+                color: #181818;
+                font-weight: 600;
+                font-size: 1.1rem;
+                text-decoration: none;
+                padding: 0 8px;
+                transition: color 0.18s;
+                cursor: pointer;
+            }
+            .rusefi-header-menu a:hover {
+                color: #fff;
             }
             .admin-login-box {
-                background: #fff;
+                background: var(--rusefi-card);
                 border-radius: 12px;
-                box-shadow: 0 2px 8px #eee;
+                box-shadow: 0 2px 8px #18181822;
                 max-width: 400px;
                 margin: 80px auto 0 auto;
                 padding: 36px 32px 28px 32px;
-                border: 1px solid #e5e5e5;
+                border: 1px solid #333;
             }
             .admin-login-box h2 {
-                color: #222;
+                color: #fff;
                 font-weight: 800;
                 margin-bottom: 24px;
                 text-align: center;
             }
             .admin-login-box label {
-                color: #222;
+                color: #fff;
                 font-weight: 500;
                 margin-bottom: 6px;
             }
             .admin-login-box input[type="password"] {
-                background: #fafafa;
-                color: #222;
-                border: 1.5px solid #e5e5e5;
+                background: #232323;
+                color: #fff;
+                border: 1.5px solid #333;
                 border-radius: 8px;
-                padding: 10px 16px;
+                padding: 12px 16px;
                 font-size: 1.1rem;
                 margin-bottom: 18px;
                 width: 100%;
                 transition: border .2s, background .2s;
             }
             .admin-login-box input[type="password"]:focus {
-                border-color: #ff6a00;
+                border-color: #ff7a1a;
                 outline: none;
-                background: #fff;
+                background: #181818;
             }
-            .admin-login-box .btn-primary {
-                background: #ff6a00 !important;
-                color: #fff !important;
+            .admin-login-box .btn-primary, .admin-login-box .btn-secondary {
+                background: var(--rusefi-orange);
+                color: #181818;
                 border: none;
-                border-radius: 8px;
-                font-weight: 600;
+                border-radius: 10px;
+                font-weight: 700;
                 font-size: 1.1rem;
-                padding: 10px 32px;
-                margin-right: 8px;
-                transition: background .2s;
+                padding: 14px 0;
+                width: 100%;
+                margin: 0 0 10px 0;
+                transition: background 0.18s, color 0.18s;
             }
-            .admin-login-box .btn-primary:hover {
-                background: #e55a00 !important;
-                color: #fff !important;
+            .admin-login-box .btn-primary:hover, .admin-login-box .btn-secondary:hover {
+                background: #ff9a4d;
+                color: #fff;
             }
             .admin-login-box .btn-secondary {
-                background: #fff !important;
-                color: #ff6a00 !important;
-                border: 2px solid #ff6a00;
-                border-radius: 8px;
-                font-weight: 600;
-                font-size: 1.1rem;
-                padding: 10px 32px;
-                transition: background .2s, color .2s;
+                background: #232323;
+                color: #ff7a1a;
+                border: 2px solid #ff7a1a;
             }
             .admin-login-box .btn-secondary:hover {
-                background: #fafafa !important;
-                color: #ff6a00 !important;
+                background: #ff7a1a;
+                color: #232323;
             }
             .admin-login-box .alert {
                 border-radius: 10px;
                 font-size: 1rem;
                 margin-bottom: 18px;
             }
-            ::selection { background: #ff6a00; color: #fff; }
-            footer { background: #f7f7f9; color: #888; text-align: center; padding: 24px 0 12px 0; font-size: 1rem; border-top: 1px solid #e5e5e5; position: fixed; left: 0; right: 0; bottom: 0; }
-            footer a { color: #ff6a00; text-decoration: none; }
+            @media (max-width: 600px) {
+                .rusefi-header { padding: 0 10px; height: 48px; }
+                .rusefi-logo { font-size: 1.3rem; }
+                .admin-login-box { max-width: 98vw; margin: 24px auto 0 auto; padding: 18px 6vw 18px 6vw; }
+                .admin-login-box h2 { font-size: 1.2rem; margin-bottom: 18px; }
+                .admin-login-box input[type="password"] { font-size: 1rem; padding: 8px 10px; }
+            }
         </style>
     </head>
     <body>
+    <header class="rusefi-header">
+        <span class="rusefi-logo">rusEFI</span>
+        <nav class="rusefi-header-menu" style="margin: 0 auto;">
+            <a href="index.php">Магазин</a>
+            <a href="#footer-contacts" id="contacts-link">Контакты</a>
+        </nav>
+        <a href="index.php" class="btn btn-primary admin-back-btn" style="min-width:110px;text-align:center;">Назад</a>
+    </header>
     <div class="admin-login-box">
         <h2>Вход в админ-панель</h2>
         <?php if (!empty($error)): ?>
@@ -113,15 +162,20 @@ if (!isset($_SESSION['admin'])) {
                 <label for="password" class="form-label">Пароль администратора</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-primary">Войти</button>
-                <a href="index.php" class="btn btn-secondary">Назад</a>
-            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Войти</button>
         </form>
     </div>
-    <footer>
-      &copy; <?php echo date('Y'); ?> 3D Print &mdash; <a href="https://www.shop.rusefi.com">rusefi.com</a>
-    </footer>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var contacts = document.getElementById('contacts-link');
+        if (contacts) {
+            contacts.onclick = function(e) {
+                e.preventDefault();
+                document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
+            };
+        }
+    });
+    </script>
     </body>
     </html>
     <?php
@@ -182,6 +236,19 @@ if (isset($_POST['delete_product']) && isset($_POST['product_id'])) {
     $products = array_values(array_filter($products, fn($p) => $p['id'] !== $id));
     file_put_contents($products_file, json_encode($products, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     header('Location: admin.php?tab=catalog');
+    exit;
+}
+// Обновление только названия или цены товара (AJAX)
+if (isset($_POST['product_id']) && (!empty($_POST['name']) || isset($_POST['price'])) && !isset($_POST['edit_product'])) {
+    $id = (int)$_POST['product_id'];
+    foreach ($products as &$p) {
+        if ($p['id'] === $id) {
+            if (isset($_POST['name'])) $p['name'] = trim($_POST['name']);
+            if (isset($_POST['price'])) $p['price'] = (int)$_POST['price'];
+        }
+    }
+    unset($p);
+    file_put_contents($products_file, json_encode($products, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     exit;
 }
 // Редактирование товара с загрузкой файла и удалением старого
@@ -303,148 +370,87 @@ function sort_link($label, $field, $tab, $sort, $order) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Админ-панель — 3D Маркетплейс</title>
+    <title>Админ-панель — rusEFI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --rusefi-orange: #ff7a1a;
+            --rusefi-dark: #232629;
+            --rusefi-card: #282b2f;
+            --rusefi-text: #fff;
+            --rusefi-accent: #ff7a1a;
+        }
         body {
-            background: #f7f7f9;
-            color: #222;
-            font-family: 'Inter', Arial, sans-serif;
+            background: var(--rusefi-dark);
+            color: var(--rusefi-text);
+            font-family: 'Inter', Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        .navbar {
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
-            box-shadow: 0 2px 8px #eee;
+        .rusefi-header {
+            background: var(--rusefi-orange);
+            color: #181818;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 36px;
         }
-        .navbar .navbar-brand {
-            color: #ff6a00;
-            font-weight: 800;
-            font-size: 1.6rem;
-            letter-spacing: -1px;
+        .rusefi-logo {
+            font-size: 2.1rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            color: #181818;
+            font-family: 'Inter', Arial, Helvetica, sans-serif;
         }
-        .navbar .nav-link {
-            color: #222;
-            font-weight: 500;
-            margin: 0 12px;
-            border-bottom: 2px solid transparent;
-            transition: border .2s, color .2s;
+        .rusefi-header-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
         }
-        .navbar .nav-link:hover {
-            color: #ff6a00;
-            border-bottom: 2px solid #ff6a00;
-        }
-        .navbar .nav-link.active, .navbar .nav-link.catalog {
-            color: #ff6a00 !important;
-            font-weight: 800;
-        }
-        .wb-header {
-            background: #fff;
-            color: #222;
-            padding: 18px 0 14px 0;
-            border-radius: 0 0 18px 18px;
-            margin-bottom: 32px;
-            box-shadow: 0 2px 8px #eee;
-            position: relative;
-            overflow: hidden;
-        }
-        .wb-header .container { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
-        .wb-logo { font-size: 2rem; font-weight: 800; letter-spacing: -2px; color: #ff6a00; text-shadow: none; display: flex; align-items: center; gap: 10px; }
-        .preview-img {
-            width: 75px;
-            height: 75px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #eee;
-        }
-        .admin-login-box, .admin-form, .admin-block, .admin-table, .admin-card, .admin-panel, .admin-section, .admin-content, .admin-modal {
-            background: #fff;
-            color: #222;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px #eee;
-            border: 1px solid #e5e5e5;
-        }
-        .admin-login-box {
-            max-width: 400px;
-            margin: 80px auto 0 auto;
-            padding: 36px 32px 28px 32px;
-        }
-        .admin-login-box h2 {
-            color: #222;
-            font-weight: 800;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        .admin-login-box label {
-            color: #222;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-        .admin-login-box input[type="password"] {
-            background: #fafafa;
-            color: #222;
-            border: 1.5px solid #e5e5e5;
-            border-radius: 8px;
-            padding: 10px 16px;
-            font-size: 1.1rem;
-            margin-bottom: 18px;
-            width: 100%;
-            transition: border .2s, background .2s;
-        }
-        .admin-login-box input[type="password"]:focus {
-            border-color: #ff6a00;
-            outline: none;
-            background: #fff;
-        }
-        .admin-login-box .btn, .admin-form .btn, .admin-block .btn, .admin-table .btn, .admin-card .btn, .admin-panel .btn, .admin-section .btn, .admin-content .btn, .admin-modal .btn {
-            background: #ff6a00 !important;
-            color: #fff !important;
-            border: none;
-            border-radius: 8px;
+        .rusefi-header-menu a {
+            color: #181818;
             font-weight: 600;
             font-size: 1.1rem;
-            padding: 10px 32px;
-            margin-right: 8px;
+            text-decoration: none;
+            padding: 0 8px;
+            transition: color 0.18s;
+            cursor: pointer;
         }
-        .admin-login-box .btn:hover, .admin-form .btn:hover, .admin-block .btn:hover, .admin-table .btn:hover, .admin-card .btn:hover, .admin-panel .btn:hover, .admin-section .btn:hover, .admin-content .btn:hover, .admin-modal .btn:hover {
-            background: #e55a00 !important;
-            color: #fff !important;
+        .rusefi-header-menu a:hover {
+            color: #fff;
         }
-        .admin-login-box .btn-secondary {
-            background: #fff !important;
-            color: #ff6a00 !important;
-            border: 2px solid #ff6a00;
+        .rusefi-main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 36px 16px 32px 16px;
         }
-        .admin-login-box .btn-secondary:hover {
-            background: #fafafa !important;
-            color: #ff6a00 !important;
+        .rusefi-title {
+            text-align: center;
+            font-size: 2.6rem;
+            font-weight: 900;
+            margin-bottom: 32px;
+            color: #fff;
         }
-        .admin-login-box .alert {
-            border-radius: 10px;
-            font-size: 1rem;
-            margin-bottom: 18px;
-        }
-        ::selection { background: #ff6a00; color: #fff; }
-        footer { background: #f7f7f9; color: #888; text-align: center; padding: 24px 0 12px 0; font-size: 1rem; border-top: 1px solid #e5e5e5; }
-        footer a { color: #ff6a00; text-decoration: none; }
         .admin-toggle-group {
             display: flex;
             justify-content: center;
             margin: 0 auto 24px auto;
-            background: #fff;
+            background: var(--rusefi-card);
             border-radius: 8px;
-            border: 1.5px solid #ff6a00;
-            box-shadow: 0 1px 4px #eee;
+            border: 1.5px solid var(--rusefi-orange);
+            box-shadow: 0 1px 4px #18181822;
             width: fit-content;
             overflow: hidden;
         }
         .admin-toggle-btn {
             font-weight: 600;
-            font-size: 1rem;
-            padding: 7px 32px;
+            font-size: 1.1rem;
+            padding: 12px 32px;
             border: none;
             background: transparent;
-            color: #ff6a00;
+            color: var(--rusefi-accent);
             transition: background .18s, color .18s;
             outline: none;
             cursor: pointer;
@@ -454,29 +460,41 @@ function sort_link($label, $field, $tab, $sort, $order) {
             justify-content: center;
         }
         .admin-toggle-btn.active {
-            background: #ff6a00;
+            background: var(--rusefi-orange);
             color: #fff;
-            box-shadow: 0 1px 4px #ff6a0033 inset;
+            box-shadow: 0 1px 4px #ff7a1a33 inset;
         }
         .admin-toggle-btn:not(:last-child) {
             border-right: 1.5px solid #ffb366;
         }
+        .admin-add-form, .admin-form, .admin-block, .admin-table, .admin-card, .admin-panel, .admin-section, .admin-content, .admin-modal {
+            background: var(--rusefi-card);
+            color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #18181822;
+            border: 1px solid #333;
+        }
         .admin-add-form {
-            background: #fffbe7;
-            border: 1.5px solid #ff6a00;
-            border-radius: 10px;
+            border: 1.5px solid var(--rusefi-orange);
             padding: 18px 24px 10px 24px;
             margin-bottom: 24px;
-            box-shadow: 0 2px 8px #ffe0b2;
         }
-        .input-file {
-            display: none;
+        .admin-add-form input, .admin-add-form textarea {
+            background: #232323;
+            color: #fff;
+            border: 1.5px solid #333;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            width: 100%;
         }
+        .admin-add-form label { color: #fff; font-weight: 500; margin-bottom: 6px; }
         .input-file-label {
             display: inline-block;
-            padding: 8px 22px;
-            background: #ff6a00;
-            color: #fff;
+            padding: 10px 22px;
+            background: var(--rusefi-orange);
+            color: #181818;
             border-radius: 8px;
             font-weight: 600;
             font-size: 1rem;
@@ -485,77 +503,370 @@ function sort_link($label, $field, $tab, $sort, $order) {
             margin-bottom: 0;
         }
         .input-file-label:hover {
-            background: #e55a00;
+            background: #ff9a4d;
+            color: #fff;
         }
         .input-file-name {
             margin-left: 16px;
             font-size: 1rem;
-            color: #222;
+            color: #fff;
             vertical-align: middle;
         }
-        @media (max-width: 600px) {
-          .admin-add-form .row { flex-direction: column; gap: 10px; }
-          .admin-add-form .col-md-3, .admin-add-form .col-md-2, .admin-add-form .col-md-4 { width: 100%; max-width: 100%; }
-          .admin-add-form input, .admin-add-form label, .admin-add-form textarea { font-size: 1rem; }
-          .admin-toggle-group { flex-direction: column; width: 100%; }
-          .admin-toggle-btn { width: 100%; min-width: 120px; }
-          .navbar .container-fluid { flex-direction: column; align-items: flex-start; }
-          .navbar .navbar-brand { font-size: 1.2rem; }
-          .footer-contacts { font-size: 0.95em; }
-          .footer-socials a { font-size: 1.2em; }
-          .table-responsive { width: 100%; overflow-x: auto; }
-          table { min-width: 600px; }
+        .admin-table {
+            background: var(--rusefi-card);
+            color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #18181822;
+            border: 1px solid #333;
+            margin-bottom: 24px;
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            color: #fff;
+            background: var(--rusefi-card);
+        }
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #333;
+            background: var(--rusefi-card);
+            vertical-align: middle;
+        }
+        th {
+            background: #232323;
+            color: var(--rusefi-accent);
+            font-weight: 700;
+        }
+        tr:last-child td { border-bottom: none; }
+        td:first-child, th:first-child { border-radius: 12px 0 0 12px; }
+        td:last-child, th:last-child { border-radius: 0 12px 12px 0; }
+        input[type="text"], textarea {
+            background: #fff;
+            color: #444;
+            border: 1.5px solid #bbb;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 1rem;
+            width: 100%;
+            transition: border .2s, background .2s, color .2s;
+        }
+        input[type="text"]::placeholder, textarea::placeholder {
+            color: #888;
+            opacity: 1;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: #ff7a1a;
+            outline: none;
+            background: #fff;
+            color: #222;
+        }
+        .btn, .btn-primary, .btn-outline-primary, .btn-danger, .btn-outline-danger, .btn-outline-secondary {
+            background: var(--rusefi-orange) !important;
+            color: #181818 !important;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 12px 28px;
+            margin-right: 8px;
+            transition: background 0.18s, color 0.18s;
+        }
+        .btn:hover, .btn-primary:hover, .btn-outline-primary:hover, .btn-danger:hover, .btn-outline-danger:hover, .btn-outline-secondary:hover {
+            background: #ff9a4d !important;
+            color: #fff !important;
+        }
+        .btn-outline-danger, .btn-danger {
+            background: #232323 !important;
+            color: #ff7a1a !important;
+            border: 2px solid #ff7a1a !important;
+        }
+        .btn-outline-danger:hover, .btn-danger:hover {
+            background: #ff7a1a !important;
+            color: #232323 !important;
+        }
+        .admin-login-box {
+            background: var(--rusefi-card);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #18181822;
+            max-width: 400px;
+            margin: 80px auto 0 auto;
+            padding: 36px 32px 28px 32px;
+            border: 1px solid #333;
+        }
+        .admin-login-box h2 {
+            color: #fff;
+            font-weight: 800;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .admin-login-box label {
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .admin-login-box input[type="password"] {
+            background: #232323;
+            color: #fff;
+            border: 1.5px solid #333;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            width: 100%;
+            transition: border .2s, background .2s;
+        }
+        .admin-login-box input[type="password"]:focus {
+            border-color: #ff7a1a;
+            outline: none;
+            background: #181818;
+        }
+        .admin-login-box .btn-primary, .admin-login-box .btn-secondary {
+            width: 100%;
+            margin: 0 0 10px 0;
+        }
+        .admin-login-box .alert {
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 18px;
+        }
+        .admin-login-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .admin-back-btn {
+            background: var(--rusefi-orange) !important;
+            color: #181818 !important;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 14px 0;
+            transition: background 0.18s, color 0.18s;
+            display: inline-block;
+            text-align: center;
+        }
+        .admin-back-btn:hover {
+            background: #ff9a4d !important;
+            color: #fff !important;
+        }
+        .admin-logout-btn {
+            background: #232323 !important;
+            color: #ff7a1a !important;
+            border: 2px solid #ff7a1a !important;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 14px 0;
+            transition: background 0.18s, color 0.18s;
+            display: inline-block;
+            text-align: center;
+        }
+        .admin-logout-btn:hover {
+            background: #ff7a1a !important;
+            color: #232323 !important;
+        }
+        .admin-catalog-btns {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        .admin-catalog-btns .btn {
+            min-width: 110px;
+            font-size: 1rem;
+            padding: 10px 0;
         }
         @media (max-width: 600px) {
-            .admin-login-box {
-                max-width: 98vw;
-                margin: 24px auto 0 auto;
-                padding: 18px 6vw 18px 6vw;
-            }
-            .admin-login-box h2 {
-                font-size: 1.2rem;
-                margin-bottom: 18px;
-            }
-            .admin-login-box input[type="password"] {
-                font-size: 1rem;
-                padding: 8px 10px;
-            }
-            .admin-login-box .btn-primary,
-            .admin-login-box .btn-secondary {
-                font-size: 1rem;
-                padding: 10px 0;
+            .rusefi-header { padding: 0 10px; height: 48px; }
+            .rusefi-logo { font-size: 1.3rem; }
+            .rusefi-title { font-size: 1.5rem; margin-bottom: 18px; }
+            .admin-login-box { max-width: 98vw; margin: 24px auto 0 auto; padding: 18px 6vw 18px 6vw; }
+        }
+        @media (max-width: 900px) {
+            .admin-add-form { flex-direction: column; gap: 10px; }
+            .admin-add-form input, .admin-add-form textarea { font-size: 1rem; }
+            .admin-catalog-btns { flex-direction: column; gap: 10px; }
+        }
+        input[type="number"] {
+            background: #fff;
+            color: #444;
+            border: 1.5px solid #bbb;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 1rem;
+            width: 100%;
+            transition: border .2s, background .2s, color .2s;
+        }
+        input[type="number"]::placeholder {
+            color: #888;
+            opacity: 1;
+        }
+        input[type="number"]:focus {
+            border-color: #ff7a1a;
+            outline: none;
+            background: #fff;
+            color: #222;
+        }
+        input[type="file"] {
+            background: #fff;
+            color: #444;
+            border: 1.5px solid #bbb;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 1rem;
+            width: 100%;
+            height: 42px;
+            box-sizing: border-box;
+            transition: border .2s, background .2s, color .2s;
+        }
+        input[type="file"]:focus {
+            border-color: #ff7a1a;
+            outline: none;
+            background: #fff;
+            color: #222;
+        }
+        .admin-table, .admin-table th, .admin-table td, table, th, td {
+            background: #fff !important;
+            color: #222 !important;
+        }
+        .admin-table th {
+            font-weight: 700;
+            color: #ff7a1a !important;
+        }
+        .admin-table th.name-col, .admin-table td.name-col {
+            min-width: 180px;
+        }
+        .admin-table th.desc-col, .admin-table td.desc-col {
+            min-width: 260px;
+        }
+        .admin-table textarea {
+            min-width: 220px;
+            max-width: 100%;
+        }
+        @media (max-width: 900px) {
+            .admin-table th.name-col, .admin-table td.name-col,
+            .admin-table th.desc-col, .admin-table td.desc-col,
+            .admin-table textarea {
+                min-width: 100px;
                 width: 100%;
-                margin: 0 0 10px 0;
             }
-            .admin-login-box .d-flex { flex-direction: column !important; gap: 0 !important; }
-            footer { font-size: 0.95rem; padding: 16px 0 8px 0; position: static; }
+        }
+        .desc-link {
+            display: inline-block;
+            color: #ff7a1a;
+            background: #fff;
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 1rem;
+            border: 1.5px solid #bbb;
+            transition: background 0.18s, color 0.18s, border 0.18s;
+            min-width: 120px;
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .desc-link:hover {
+            background: #ff7a1a;
+            color: #fff;
+            border-color: #ff7a1a;
+        }
+        .editable-link {
+            display: inline-block;
+            color: #ff7a1a;
+            background: #fff;
+            border-radius: 8px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 1rem;
+            border: 1.5px solid #bbb;
+            transition: background 0.18s, color 0.18s, border 0.18s;
+            min-width: 80px;
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .editable-link:hover {
+            background: #ff7a1a;
+            color: #fff;
+            border-color: #ff7a1a;
+        }
+        .desc-modal-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .desc-modal {
+            background: #fff;
+            color: #222;
+            border-radius: 14px;
+            padding: 32px 24px 24px 24px;
+            min-width: 320px;
+            max-width: 98vw;
+            box-shadow: 0 4px 32px #0003;
+            position: relative;
+        }
+        .desc-modal textarea {
+            width: 100%;
+            min-height: 90px;
+            border-radius: 8px;
+            border: 1.5px solid #bbb;
+            padding: 10px;
+            font-size: 1rem;
+            color: #222;
+            background: #fff;
+            margin-bottom: 18px;
+        }
+        .desc-modal .desc-modal-close {
+            position: absolute;
+            top: 10px; right: 16px;
+            font-size: 1.5rem;
+            color: #888;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .desc-modal .btn {
+            min-width: 120px;
+        }
+        #desc-modal-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+        .admin-table td, .admin-catalog-btns {
+            vertical-align: middle !important;
         }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid" style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
-    <div style="display:flex;align-items:center;gap:18px;">
-      <a class="navbar-brand" href="index.php">3D Print</a>
-      <a class="nav-link catalog active" href="index.php" style="font-weight:800;color:#ff6a00;margin-left:18px;">Каталог</a>
-    </div>
-    <a href="admin.php?logout=1" class="btn btn-outline-danger d-none d-sm-inline-block" id="logout-desktop" style="font-weight:600;border-radius:12px;">Выйти</a>
-    <a href="admin.php?logout=1" class="btn btn-outline-danger d-inline-block d-sm-none ms-2" id="logout-mobile" style="font-weight:600;border-radius:12px;">Выйти</a>
-  </div>
-</nav>
-<style>
-@media (max-width: 600px) {
-  .navbar .container-fluid { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
-  .navbar .navbar-brand { font-size: 1.2rem; margin-bottom: 0; }
-  .nav-link.catalog { font-size: 1.1rem; margin-left: 12px !important; }
-  #logout-desktop { display: none !important; }
-  #logout-mobile { display: inline-block !important; margin-left: 8px; }
-}
-@media (min-width: 601px) {
-  #logout-mobile { display: none !important; }
-}
-</style>
-<div class="container mt-4">
+    <header class="rusefi-header">
+        <span class="rusefi-logo">rusEFI</span>
+        <nav class="rusefi-header-menu" style="margin: 0 auto;">
+            <a href="index.php">Магазин</a>
+            <a href="#footer-contacts" id="contacts-link">Контакты</a>
+        </nav>
+        <a href="admin.php?logout=1" class="btn btn-secondary admin-logout-btn" style="min-width:110px;text-align:center;">Выйти</a>
+    </header>
+    <main class="rusefi-main">
     <div class="admin-toggle-group mb-4">
         <a href="admin.php?tab=orders" class="admin-toggle-btn<?php if ($tab === 'orders') echo ' active'; ?>">Заявки</a>
         <a href="admin.php?tab=catalog" class="admin-toggle-btn<?php if ($tab === 'catalog') echo ' active'; ?>">Каталог</a>
@@ -563,7 +874,6 @@ function sort_link($label, $field, $tab, $sort, $order) {
     <?php if ($tab === 'orders'): ?>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1>Заявки</h1>
-            <a href="?logout=1" class="btn btn-outline-danger">Выйти</a>
         </div>
         <form class="mb-3" method="get" style="max-width: 700px;">
             <input type="hidden" name="tab" value="orders">
@@ -640,7 +950,6 @@ function sort_link($label, $field, $tab, $sort, $order) {
     <?php elseif ($tab === 'catalog'): ?>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1>Каталог товаров</h1>
-            <a href="?logout=1" class="btn btn-outline-danger">Выйти</a>
         </div>
         <form class="admin-add-form mb-4" method="post" enctype="multipart/form-data">
             <div class="row g-2 align-items-end">
@@ -652,8 +961,7 @@ function sort_link($label, $field, $tab, $sort, $order) {
                 </div>
                 <div class="col-md-4 d-flex align-items-center">
                     <input type="file" class="input-file" name="img_file" accept="image/*" id="add-img-file">
-                    <label for="add-img-file" class="input-file-label mb-0">Выбрать фото</label>
-                    <span class="input-file-name" id="add-img-file-name">фото не выбрано</span>
+                    <!-- убираю кастомную кнопку и подпись, оставляю только input type='file' -->
                 </div>
                 <div class="col-md-3">
                     <input type="text" class="form-control" name="description" placeholder="Описание">
@@ -666,7 +974,7 @@ function sort_link($label, $field, $tab, $sort, $order) {
         <script>
         document.getElementById('add-img-file').addEventListener('change', function(e) {
             const fileName = this.files[0] ? this.files[0].name : 'фото не выбрано';
-            document.getElementById('add-img-file-name').textContent = fileName;
+            // document.getElementById('add-file-name').textContent = fileName; // Удалено
         });
         </script>
         <div class="table-responsive">
@@ -675,10 +983,10 @@ function sort_link($label, $field, $tab, $sort, $order) {
                 <tr>
                     <th>#</th>
                     <th>Фото</th>
-                    <th><?php echo sort_link('Название', 'name', $tab, $sort, $order); ?></th>
+                    <th class="name-col">Название</th>
                     <th><?php echo sort_link('Цена', 'price', $tab, $sort, $order); ?></th>
                     <th>Картинка</th>
-                    <th>Описание</th>
+                    <th class="desc-col">Описание</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
@@ -689,16 +997,30 @@ function sort_link($label, $field, $tab, $sort, $order) {
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
                             <td><?php echo $i + 1; ?></td>
                             <td><?php if ($p['img']): ?><img src="<?php echo htmlspecialchars($p['img']); ?>" class="preview-img" alt="img"><?php endif; ?></td>
-                            <td><input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($p['name']); ?>" required></td>
-                            <td><input type="number" name="price" class="form-control" value="<?php echo number_format($p['price'], 0, '', ' '); ?>" min="1" required></td>
+                            <td class="name-col">
+                                <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="name" data-value="<?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?>">
+                                    <?php echo htmlspecialchars($p['name']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="price" data-value="<?php echo htmlspecialchars($p['price'], ENT_QUOTES); ?>">
+                                    <?php echo number_format($p['price'], 0, '', ' '); ?>
+                                </span>
+                            </td>
                             <td>
                                 <input type="file" name="img_file" class="form-control mb-1" accept="image/*">
-                                <input type="text" name="img" class="form-control mb-1" value="<?php echo htmlspecialchars($p['img']); ?>" placeholder="URL или путь (если не загружаете файл)">
+                                <!-- убираю кастомную кнопку и подпись, оставляю только input type='file' -->
                             </td>
-                            <td><textarea name="description" class="form-control" rows="2" placeholder="Описание"><?php echo htmlspecialchars($p['description'] ?? ''); ?></textarea></td>
-                            <td class="d-flex gap-2">
-                                <button type="submit" name="edit_product" class="btn btn-sm btn-outline-primary">Сохранить</button>
-                                <button type="submit" name="delete_product" class="btn btn-sm btn-danger" onclick="return confirm('Удалить товар?');">Удалить</button>
+                            <td class="desc-col">
+                                <span class="desc-link" data-id="<?php echo $p['id']; ?>" data-desc="<?php echo htmlspecialchars($p['description'] ?? '', ENT_QUOTES); ?>">
+                                    <?php echo ($p['description'] ? mb_substr($p['description'], 0, 40) . (mb_strlen($p['description']) > 40 ? '…' : '') : 'Описание товара'); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="admin-catalog-btns">
+                                    <button type="submit" name="edit_product" class="btn btn-sm btn-outline-primary">Сохранить</button>
+                                    <button type="submit" name="delete_product" class="btn btn-sm btn-danger" onclick="return confirm('Удалить товар?');">Удалить</button>
+                                </div>
                             </td>
                         </form>
                     </tr>
@@ -708,15 +1030,105 @@ function sort_link($label, $field, $tab, $sort, $order) {
         </div>
     <?php endif; ?>
 </div>
-<footer>
-  <div class="footer-contacts">
-    <div>+7 (777) 123-45-67 &nbsp; | &nbsp; +7 (701) 987-65-43</div>
-    <div class="footer-socials">
-      <a href="https://wa.me/77011234567" target="_blank" title="WhatsApp"><svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.09-1.33A9.96 9.96 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm0 18c-1.61 0-3.16-.39-4.5-1.13l-.32-.18-3.02.79.81-2.95-.21-.34A7.96 7.96 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8Zm4.29-5.18c-.23-.12-1.36-.67-1.57-.75-.21-.08-.36-.12-.51.12-.15.23-.58.75-.71.9-.13.15-.26.17-.49.06-.23-.12-.97-.36-1.85-1.13-.68-.6-1.14-1.34-1.28-1.57-.13-.23-.01-.35.1-.47.1-.1.23-.26.34-.39.12-.13.15-.23.23-.38.08-.15.04-.28-.02-.4-.06-.12-.51-1.23-.7-1.68-.18-.44-.37-.38-.51-.39-.13-.01-.28-.01-.43-.01-.15 0-.4.06-.61.28-.21.22-.8.78-.8 1.9 0 1.12.82 2.2.94 2.35.12.15 1.61 2.46 3.91 3.35.55.19.98.3 1.31.38.55.14 1.05.12 1.44.07.44-.07 1.36-.56 1.55-1.1.19-.54.19-1 .13-1.1-.06-.1-.21-.16-.44-.28Z" fill="#ff6a00"/></svg></a>
-      <a href="https://t.me/yourtelegram" target="_blank" title="Telegram"><svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M9.04 16.62c-.31 0-.26-.12-.37-.42l-1.1-3.62 8.7-5.47c.38-.23.58-.1.47.33l-1.48 6.97c-.1.43-.36.54-.73.34l-2.04-1.5-1 .97c-.11.11-.2.2-.41.2Zm-1.3-4.41 1.01 3.1.26-.84c.08-.25.16-.34.34-.48l2.7-2.47c.15-.13.29-.4-.06-.4l-3.99.09c-.34 0-.41.16-.26.4Zm2.26 1.41 1.62 1.19c.16.12.32.18.37-.07l1.33-6.25c.05-.25-.09-.36-.32-.25l-5.7 3.59c-.23.15-.22.24.05.29l2.65.5c.27.05.36.18.3.41Zm1.99-11.62C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10S17.52 2 12 2Z" fill="#ff6a00"/></svg></a>
-      <a href="mailto:info@example.com" target="_blank" title="Email"><svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 2v.01L12 13 4 6.01V6h16ZM4 20v-9.99l7.29 6.41c.38.34.95.34 1.33 0L20 10.01V20H4Z" fill="#ff6a00"/></svg></a>
+<footer id="footer-contacts" style="background:#232629;color:#bbb;text-align:center;padding:24px 0 12px 0;font-size:1rem;border-top:1px solid #333;">
+    <div style="margin-bottom:8px;font-size:1.15em;">
+        Телефон для связи: <a href="tel:+77001234567" style="color:#ff7a1a;">+7 (700) 123-45-67</a>
     </div>
-  </div>
+    &copy; <?php echo date('Y'); ?> rusEFI — <a href="https://www.shop.rusefi.com" style="color:#ff7a1a;">rusefi.com</a>
 </footer>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var contacts = document.getElementById('contacts-link');
+    if (contacts) {
+        contacts.onclick = function(e) {
+            e.preventDefault();
+            document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
+        };
+    }
+});
+</script>
+    <div id="desc-modal-bg" style="display:none;"></div>
+    <script>
+    document.addEventListener('click', function(e) {
+        // Описание
+        if (e.target.classList.contains('desc-link')) {
+            const id = e.target.getAttribute('data-id');
+            const current = e.target.getAttribute('data-desc') || '';
+            const modalBg = document.getElementById('desc-modal-bg');
+            modalBg.innerHTML = `<div class='desc-modal'>
+                <button class='desc-modal-close'>&times;</button>
+                <form class='desc-modal-form'>
+                    <textarea name='description' placeholder='Описание товара'>${current.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    <input type='hidden' name='product_id' value='${id}'>
+                    <button type='submit' class='btn btn-primary'>Сохранить</button>
+                </form>
+            </div>`;
+            modalBg.style.display = 'flex';
+            modalBg.querySelector('.desc-modal-close').onclick = function() {
+                modalBg.style.display = 'none';
+            };
+            modalBg.querySelector('.desc-modal-form').onsubmit = function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('admin.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(r => r.text()).then(() => { location.reload(); });
+            };
+        }
+        // Название
+        if (e.target.classList.contains('editable-link') && e.target.dataset.type === 'name') {
+            const id = e.target.getAttribute('data-id');
+            const current = e.target.getAttribute('data-value') || '';
+            const modalBg = document.getElementById('desc-modal-bg');
+            modalBg.innerHTML = `<div class='desc-modal'>
+                <button class='desc-modal-close'>&times;</button>
+                <form class='desc-modal-form'>
+                    <input type='text' name='name' placeholder='Название товара' value="${current.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')}">
+                    <input type='hidden' name='product_id' value='${id}'>
+                    <button type='submit' class='btn btn-primary'>Сохранить</button>
+                </form>
+            </div>`;
+            modalBg.style.display = 'flex';
+            modalBg.querySelector('.desc-modal-close').onclick = function() {
+                modalBg.style.display = 'none';
+            };
+            modalBg.querySelector('.desc-modal-form').onsubmit = function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('admin.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(r => r.text()).then(() => { location.reload(); });
+            };
+        }
+        // Цена
+        if (e.target.classList.contains('editable-link') && e.target.dataset.type === 'price') {
+            const id = e.target.getAttribute('data-id');
+            const current = e.target.getAttribute('data-value') || '';
+            const modalBg = document.getElementById('desc-modal-bg');
+            modalBg.innerHTML = `<div class='desc-modal'>
+                <button class='desc-modal-close'>&times;</button>
+                <form class='desc-modal-form'>
+                    <input type='number' name='price' placeholder='Цена' value="${current.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')}">
+                    <input type='hidden' name='product_id' value='${id}'>
+                    <button type='submit' class='btn btn-primary'>Сохранить</button>
+                </form>
+            </div>`;
+            modalBg.style.display = 'flex';
+            modalBg.querySelector('.desc-modal-close').onclick = function() {
+                modalBg.style.display = 'none';
+            };
+            modalBg.querySelector('.desc-modal-form').onsubmit = function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('admin.php', {
+                    method: 'POST',
+                    body: formData
+                }).then(r => r.text()).then(() => { location.reload(); });
+            };
+        }
+    });
+    </script>
 </body>
 </html> 
