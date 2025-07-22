@@ -11,6 +11,11 @@ $products = [];
 $products_file = __DIR__ . '/products.json';
 if (file_exists($products_file)) {
     $products_arr = json_decode(file_get_contents($products_file), true);
+    foreach ($products_arr as &$item) {
+        if (!is_array($item['name'])) $item['name'] = ['ru'=>$item['name'], 'kz'=>''];
+        if (!is_array($item['description'])) $item['description'] = ['ru'=>$item['description'], 'kz'=>''];
+    }
+    unset($item);
     foreach ($products_arr as $item) {
         $products[$item['id']] = $item;
     }
@@ -193,24 +198,31 @@ if ($chat_id) {
     <header class="rusefi-header">
         <span class="rusefi-logo">rusEFI</span>
         <nav class="rusefi-header-menu">
-            <a href="index.php">Магазин</a>
-            <a href="#footer-contacts" id="contacts-link">Контакты</a>
+            <a href="index.php"><?= $texts[$lang]['shop'] ?></a>
+            <a href="#footer-contacts" id="contacts-link"><?= $texts[$lang]['contacts'] ?></a>
         </nav>
-        <a href="cart.php" class="rusefi-cart">
-            <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-            <span id="cart-count" class="rusefi-cart-count">0</span>
-        </a>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <form method="get" style="margin:0;padding:0;">
+                <button type="submit" name="lang" value="<?= $lang==='ru'?'kz':'ru' ?>" style="background:none;border:none;color:#181818;font-size:1.1rem;cursor:pointer;text-decoration:none;outline:none;box-shadow:none;"> <?= $lang==='ru'?'Рус':'Қаз' ?> </button>
+            </form>
+            <a href="cart.php" class="rusefi-cart">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span id="cart-count" class="rusefi-cart-count">0</span>
+            </a>
+        </div>
     </header>
     <main class="rusefi-main">
         <div class="success-block">
-            <h1>Заявка отправлена</h1>
-            <p>Спасибо! Ваша заявка принята. Мы свяжемся с вами в ближайшее время.</p>
-            <a href="index.php" class="btn btn-primary">Вернуться в магазин</a>
+            <h1><?= $texts[$lang]['order_sent'] ?></h1>
+            <p><?= $texts[$lang]['thanks'] ?></p>
+            <a href="index.php" class="btn btn-primary">
+                <?= $texts[$lang]['back_to_shop'] ?>
+            </a>
         </div>
     </main>
     <footer id="footer-contacts" style="background:#232629;color:#bbb;text-align:center;padding:24px 0 12px 0;font-size:1rem;border-top:1px solid #333;">
         <div style="margin-bottom:8px;font-size:1.15em;">
-            Телефон для связи: <a href="tel:+77001234567" style="color:#ff7a1a;">+7 (700) 123-45-67</a>
+            <?= $texts[$lang]['phone_label'] ?> <a href="tel:+77001234567" style="color:#ff7a1a;">+7 (700) 123-45-67</a>
         </div>
         &copy; <?php echo date('Y'); ?> rusEFI — <a href="https://www.shop.rusefi.com" style="color:#ff7a1a;">rusefi.com</a>
     </footer>

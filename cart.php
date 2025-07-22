@@ -4,13 +4,48 @@ $products = [];
 $products_file = __DIR__ . '/products.json';
 if (file_exists($products_file)) {
     $products_arr = json_decode(file_get_contents($products_file), true);
+    foreach ($products_arr as &$item) {
+        if (!is_array($item['name'])) $item['name'] = ['ru'=>$item['name'], 'kz'=>''];
+        if (!is_array($item['description'])) $item['description'] = ['ru'=>$item['description'], 'kz'=>''];
+    }
+    unset($item);
     foreach ($products_arr as $item) {
         $products[$item['id']] = $item;
     }
 }
+// --- Язык ---
+if (isset($_GET['lang'])) {
+    setcookie('lang', $_GET['lang'], time() + 3600*24*30, '/');
+    $_COOKIE['lang'] = $_GET['lang'];
+    header('Location: cart.php');
+    exit;
+}
+$lang = $_COOKIE['lang'] ?? 'ru';
+$texts = [
+    'ru' => [
+        'shop' => 'Магазин',
+        'contacts' => 'Контакты',
+        'cart' => 'Корзина',
+        'order' => 'Оформить заказ',
+        'empty_cart' => 'Корзина пуста.',
+        'remove' => 'Удалить',
+        'total' => 'Итого:',
+        'phone_label' => 'Телефон для связи:',
+    ],
+    'kz' => [
+        'shop' => 'Дүкен',
+        'contacts' => 'Байланыс',
+        'cart' => 'Себет',
+        'order' => 'Тапсырыс беру',
+        'empty_cart' => 'Себет бос.',
+        'remove' => 'Жою',
+        'total' => 'Жалпы:',
+        'phone_label' => 'Байланыс телефоны:',
+    ]
+];
 ?>
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="<?= $lang ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -233,29 +268,41 @@ if (file_exists($products_file)) {
     <header class="rusefi-header">
         <span class="rusefi-logo">rusEFI</span>
         <nav class="rusefi-header-menu">
-            <a href="index.php">Магазин</a>
-            <a href="#footer-contacts" id="contacts-link">Контакты</a>
+            <a href="index.php"><?= $texts[$lang]['shop'] ?></a>
+            <a href="#footer-contacts" id="contacts-link"><?= $texts[$lang]['contacts'] ?></a>
         </nav>
-        <a href="cart.php" class="rusefi-cart">
-            <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-            <span id="cart-count" class="rusefi-cart-count">0</span>
-        </a>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <form method="get" style="margin:0;padding:0;">
+                <button type="submit" name="lang" value="<?= $lang==='ru'?'kz':'ru' ?>" style="background:none;border:none;color:#181818;font-size:1.1rem;cursor:pointer;text-decoration:none;outline:none;box-shadow:none;"> <?= $lang==='ru'?'Рус':'Қаз' ?> </button>
+            </form>
+            <a href="cart.php" class="rusefi-cart">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span id="cart-count" class="rusefi-cart-count">0</span>
+            </a>
+        </div>
     </header>
     <main class="rusefi-main">
-        <h1 class="rusefi-title">Корзина</h1>
+        <h1 class="rusefi-title">
+            <?= $texts[$lang]['cart'] ?>
+        </h1>
         <div class="cart-list" id="cart-list"></div>
         <div id="cart-summary"></div>
         <div class="cart-actions" id="cart-actions" style="display:none;">
-            <a href="order.php" class="cart-order-btn">Оформить заказ</a>
+            <a href="order.php" class="cart-order-btn"><?= $texts[$lang]['order'] ?></a>
         </div>
     </main>
     <footer id="footer-contacts" style="background:#232629;color:#bbb;text-align:center;padding:24px 0 12px 0;font-size:1rem;border-top:1px solid #333;">
         <div style="margin-bottom:8px;font-size:1.15em;">
-            Телефон для связи: <a href="tel:+77001234567" style="color:#ff7a1a;">+7 (700) 123-45-67</a>
+            <?= $texts[$lang]['phone_label'] ?> <a href="tel:+77001234567" style="color:#ff7a1a;">+7 (700) 123-45-67</a>
         </div>
         &copy; <?php echo date('Y'); ?> rusEFI — <a href="https://www.shop.rusefi.com" style="color:#ff7a1a;">rusefi.com</a>
     </footer>
     <script>
+    const lang = "<?= $lang ?>";
+    const texts = {
+        ru: { remove: "Удалить", empty_cart: "Корзина пуста.", order: "Оформить заказ", total: "Итого:" },
+        kz: { remove: "Жою", empty_cart: "Себет бос.", order: "Тапсырыс беру", total: "Жалпы:" }
+    };
     const products = <?php echo json_encode(array_values($products), JSON_UNESCAPED_UNICODE); ?>;
     function getCart() { return JSON.parse(localStorage.getItem('cart') || '{}'); }
     function setCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); }
@@ -277,27 +324,30 @@ if (file_exists($products_file)) {
                 hasItems = true;
                 const sum = p.price * qty;
                 total += sum;
+                // Мультиязычность для name/description
+                let name = typeof p.name === 'object' ? (p.name[lang] || p.name['ru'] || '') : p.name;
+                let desc = typeof p.description === 'object' ? (p.description[lang] || p.description['ru'] || '') : (p.description || '');
                 html += `<div class='cart-list-card'>
-                    <img src='${p.img}' alt='${p.name}'>
+                    <img src='${p.img}' alt='${name}'>
                     <div class='cart-list-info'>
-                        <div class='cart-list-title'>${p.name}</div>
+                        <div class='cart-list-title'>${name}</div>
                         <div class='cart-list-price'>${formatPrice(p.price)}</div>
-                        <div class='cart-list-desc'>${p.description || ''}</div>
+                        <div class='cart-list-desc'>${desc}</div>
                         <div class='cart-list-qty-block'>
                             <button class='cart-list-minus' data-id='${p.id}'>-</button>
                             <span class='cart-list-qty'>${qty}</span>
                             <button class='cart-list-plus' data-id='${p.id}'>+</button>
                         </div>
                     </div>
-                    <button class='cart-list-remove' data-id='${p.id}'>Удалить</button>
+                    <button class='cart-list-remove' data-id='${p.id}'>${texts[lang].remove}</button>
                 </div>`;
             }
         });
         if (hasItems) {
-            document.getElementById('cart-summary').innerHTML = `<div class='cart-summary'>Итого: <span class='cart-total'>${formatPrice(total)}</span></div>`;
+            document.getElementById('cart-summary').innerHTML = `<div class='cart-summary'>${texts[lang].total} <span class='cart-total'>${formatPrice(total)}</span></div>`;
             document.getElementById('cart-actions').style.display = '';
         } else {
-            html = '<p style="text-align:center;font-size:1.2em;">Корзина пуста.</p>';
+            html = `<p style="text-align:center;font-size:1.2em;">${texts[lang].empty_cart}</p>`;
             document.getElementById('cart-summary').innerHTML = '';
             document.getElementById('cart-actions').style.display = 'none';
         }

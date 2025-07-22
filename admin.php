@@ -197,10 +197,16 @@ if (file_exists($products_file)) {
 if (isset($_POST['add_product'])) {
     $new = [
         'id' => time(),
-        'name' => trim($_POST['name'] ?? ''),
+        'name' => [
+            'ru' => trim($_POST['name_ru'] ?? ''),
+            'kz' => trim($_POST['name_kz'] ?? '')
+        ],
         'price' => (int)($_POST['price'] ?? 0),
         'img' => '',
-        'description' => trim($_POST['description'] ?? ''),
+        'description' => [
+            'ru' => trim($_POST['desc_ru'] ?? ''),
+            'kz' => trim($_POST['desc_kz'] ?? '')
+        ],
     ];
     // Обработка загрузки файла
     if (isset($_FILES['img_file']) && $_FILES['img_file']['error'] === UPLOAD_ERR_OK) {
@@ -217,7 +223,7 @@ if (isset($_POST['add_product'])) {
     if (!$new['img']) {
         $new['img'] = trim($_POST['img'] ?? '');
     }
-    if ($new['name'] && $new['price'] > 0 && $new['img']) {
+    if ($new['name']['ru'] && $new['name']['kz'] && $new['price'] > 0 && $new['img']) {
         $products[] = $new;
         file_put_contents($products_file, json_encode($products, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
@@ -256,9 +262,14 @@ if (isset($_POST['edit_product']) && isset($_POST['product_id'])) {
     $id = (int)$_POST['product_id'];
     foreach ($products as &$p) {
         if ($p['id'] === $id) {
-            $p['name'] = trim($_POST['name'] ?? $p['name']);
+            // Миграция старых товаров
+            if (!is_array($p['name'])) $p['name'] = ['ru'=>$p['name'],'kz'=>''];
+            if (!is_array($p['description'])) $p['description'] = ['ru'=>$p['description'],'kz'=>''];
+            $p['name']['ru'] = trim($_POST['name_ru'] ?? $p['name']['ru']);
+            $p['name']['kz'] = trim($_POST['name_kz'] ?? $p['name']['kz']);
             $p['price'] = (int)($_POST['price'] ?? $p['price']);
-            $p['description'] = trim($_POST['description'] ?? $p['description']);
+            $p['description']['ru'] = trim($_POST['desc_ru'] ?? $p['description']['ru']);
+            $p['description']['kz'] = trim($_POST['desc_kz'] ?? $p['description']['kz']);
             // Обработка загрузки файла
             if (isset($_FILES['img_file']) && $_FILES['img_file']['error'] === UPLOAD_ERR_OK) {
                 $ext = strtolower(pathinfo($_FILES['img_file']['name'], PATHINFO_EXTENSION));
@@ -855,6 +866,31 @@ function sort_link($label, $field, $tab, $sort, $order) {
         .admin-table td, .admin-catalog-btns {
             vertical-align: middle !important;
         }
+        .admin-table img,
+        .admin-catalog-table img {
+            max-width: 120px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px #0001;
+        }
+        .preview-img {
+            max-width: 120px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px #0001;
+        }
     </style>
 </head>
 <body>
@@ -922,7 +958,11 @@ function sort_link($label, $field, $tab, $sort, $order) {
                         <td>
                             <ul class="mb-0">
                                 <?php foreach ($order['items'] as $item): ?>
-                                    <li><?php echo htmlspecialchars($item['name']); ?> x <?php echo $item['qty']; ?> (<?php echo number_format($item['price'], 0, '', ' '); ?> KZT)</li>
+                                    <li><?php 
+$name = $item['name'];
+if (is_array($name)) $name = $name['ru'];
+echo htmlspecialchars($name); 
+?> x <?php echo $item['qty']; ?> (<?php echo number_format($item['price'], 0, '', ' '); ?> KZT)</li>
                                 <?php endforeach; ?>
                             </ul>
                         </td>
@@ -951,20 +991,55 @@ function sort_link($label, $field, $tab, $sort, $order) {
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1>Каталог товаров</h1>
         </div>
+        <div class="d-flex justify-content-center mb-3">
+            <button type="button" class="btn btn-success" id="openAddModal">Добавить товар</button>
+        </div>
+    <div id="addProductModal" style="display:none;position:fixed;z-index:2000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+      <div style="background:#232323;color:#fff;border-radius:14px;max-width:520px;width:98vw;padding:32px 24px 24px 24px;box-shadow:0 4px 32px #0003;position:relative;">
+        <button type="button" id="closeAddModal" style="position:absolute;top:10px;right:16px;font-size:1.5rem;color:#888;background:none;border:none;cursor:pointer;">&times;</button>
+        <form class="admin-add-form" method="post" enctype="multipart/form-data">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <input type="text" class="form-control" name="name_ru" placeholder="Название (рус)" required>
+            <input type="text" class="form-control" name="name_kz" placeholder="Атауы (қаз)" required>
+            <input type="number" class="form-control" name="price" placeholder="Цена" min="1" required>
+            <input type="file" class="input-file" name="img_file" accept="image/*">
+            <input type="text" class="form-control" name="desc_ru" placeholder="Описание (рус)">
+            <input type="text" class="form-control" name="desc_kz" placeholder="Сипаттамасы (қаз)">
+          </div>
+          <button type="submit" name="add_product" class="btn btn-success w-100 mt-3">Добавить</button>
+        </form>
+      </div>
+    </div>
+    <div id="inputModal" style="display:none;position:fixed;z-index:3000;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+      <div style="background:#232323;color:#fff;border-radius:14px;max-width:420px;width:98vw;padding:32px 24px 24px 24px;box-shadow:0 4px 32px #0003;position:relative;">
+        <button type="button" id="closeInputModal" style="position:absolute;top:10px;right:16px;font-size:1.5rem;color:#888;background:none;border:none;cursor:pointer;">&times;</button>
+        <form id="inputModalForm">
+          <label id="inputModalLabel" style="font-weight:600;margin-bottom:8px;display:block;"></label>
+          <textarea id="inputModalTextarea" class="form-control" style="min-height:90px;"></textarea>
+          <button type="submit" class="btn btn-success w-100 mt-3">Сохранить</button>
+        </form>
+      </div>
+    </div>
+    <style>
+    @media (min-width: 700px) {
+      .admin-add-form:not(#addProductModal .admin-add-form) { display: none !important; }
+    }
+    </style>
         <form class="admin-add-form mb-4" method="post" enctype="multipart/form-data">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <input type="text" class="form-control" name="name" placeholder="Название" required>
+            <div class="row g-2 align-items-start" style="display:flex;flex-wrap:wrap;gap:0;">
+                <div style="display:flex;flex-direction:column;min-width:180px;flex:1;">
+                    <input type="text" class="form-control mb-1" name="name_ru" placeholder="Название (рус)" required>
+                    <input type="text" class="form-control" name="name_kz" placeholder="Атауы (қаз)" required>
                 </div>
-                <div class="col-md-2">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:110px;max-width:120px;margin:0 12px;">
                     <input type="number" class="form-control" name="price" placeholder="Цена" min="1" required>
                 </div>
-                <div class="col-md-4 d-flex align-items-center">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:140px;max-width:160px;margin:0 12px;">
                     <input type="file" class="input-file" name="img_file" accept="image/*" id="add-img-file">
-                    <!-- убираю кастомную кнопку и подпись, оставляю только input type='file' -->
                 </div>
-                <div class="col-md-3">
-                    <input type="text" class="form-control" name="description" placeholder="Описание">
+                <div style="display:flex;flex-direction:column;min-width:220px;flex:2;">
+                    <input type="text" class="form-control mb-1" name="desc_ru" placeholder="Описание (рус)">
+                    <input type="text" class="form-control" name="desc_kz" placeholder="Сипаттамасы (қаз)">
                 </div>
             </div>
             <div class="d-flex justify-content-center mt-3">
@@ -998,9 +1073,9 @@ function sort_link($label, $field, $tab, $sort, $order) {
                             <td><?php echo $i + 1; ?></td>
                             <td><?php if ($p['img']): ?><img src="<?php echo htmlspecialchars($p['img']); ?>" class="preview-img" alt="img"><?php endif; ?></td>
                             <td class="name-col">
-                                <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="name" data-value="<?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?>">
-                                    <?php echo htmlspecialchars($p['name']); ?>
-                                </span>
+                                <?php $curLang = $_COOKIE['lang'] ?? 'ru'; ?>
+                                <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="name_ru" data-value="<?php echo htmlspecialchars(is_array($p['name'])?$p['name']['ru']:$p['name']); ?>">RU: <?php echo htmlspecialchars(is_array($p['name'])?$p['name']['ru']:$p['name']); ?></span>
+                                <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="name_kz" data-value="<?php echo htmlspecialchars(is_array($p['name'])?$p['name']['kz']:''); ?>">KZ: <?php echo htmlspecialchars(is_array($p['name'])?$p['name']['kz']:''); ?></span>
                             </td>
                             <td>
                                 <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="price" data-value="<?php echo htmlspecialchars($p['price'], ENT_QUOTES); ?>">
@@ -1012,9 +1087,8 @@ function sort_link($label, $field, $tab, $sort, $order) {
                                 <!-- убираю кастомную кнопку и подпись, оставляю только input type='file' -->
                             </td>
                             <td class="desc-col">
-                                <span class="desc-link" data-id="<?php echo $p['id']; ?>" data-desc="<?php echo htmlspecialchars($p['description'] ?? '', ENT_QUOTES); ?>">
-                                    <?php echo ($p['description'] ? mb_substr($p['description'], 0, 40) . (mb_strlen($p['description']) > 40 ? '…' : '') : 'Описание товара'); ?>
-                                </span>
+                                <span class="desc-link" data-id="<?php echo $p['id']; ?>" data-type="desc_ru" data-desc="<?php echo htmlspecialchars(is_array($p['description'])?$p['description']['ru']:$p['description']); ?>">RU: <?php echo htmlspecialchars(is_array($p['description'])?$p['description']['ru']:$p['description']); ?></span>
+                                <span class="desc-link" data-id="<?php echo $p['id']; ?>" data-type="desc_kz" data-desc="<?php echo htmlspecialchars(is_array($p['description'])?$p['description']['kz']:''); ?>">KZ: <?php echo htmlspecialchars(is_array($p['description'])?$p['description']['kz']:''); ?></span>
                             </td>
                             <td>
                                 <div class="admin-catalog-btns">
@@ -1050,15 +1124,17 @@ document.addEventListener('DOMContentLoaded', function() {
     <div id="desc-modal-bg" style="display:none;"></div>
     <script>
     document.addEventListener('click', function(e) {
-        // Описание
+        // Описание RU/KZ
         if (e.target.classList.contains('desc-link')) {
             const id = e.target.getAttribute('data-id');
+            const type = e.target.getAttribute('data-type');
             const current = e.target.getAttribute('data-desc') || '';
             const modalBg = document.getElementById('desc-modal-bg');
+            let label = type === 'desc_kz' ? 'Сипаттамасы (қаз)' : 'Описание (рус)';
             modalBg.innerHTML = `<div class='desc-modal'>
                 <button class='desc-modal-close'>&times;</button>
                 <form class='desc-modal-form'>
-                    <textarea name='description' placeholder='Описание товара'>${current.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    <textarea name='${type}' placeholder='${label}'>${current.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
                     <input type='hidden' name='product_id' value='${id}'>
                     <button type='submit' class='btn btn-primary'>Сохранить</button>
                 </form>
@@ -1076,41 +1152,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).then(r => r.text()).then(() => { location.reload(); });
             };
         }
-        // Название
-        if (e.target.classList.contains('editable-link') && e.target.dataset.type === 'name') {
+        // Название RU/KZ
+        if (e.target.classList.contains('editable-link')) {
             const id = e.target.getAttribute('data-id');
+            const type = e.target.getAttribute('data-type');
             const current = e.target.getAttribute('data-value') || '';
             const modalBg = document.getElementById('desc-modal-bg');
+            let label = type === 'name_kz' ? 'Атауы (қаз)' : 'Название (рус)';
             modalBg.innerHTML = `<div class='desc-modal'>
                 <button class='desc-modal-close'>&times;</button>
                 <form class='desc-modal-form'>
-                    <input type='text' name='name' placeholder='Название товара' value="${current.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')}">
-                    <input type='hidden' name='product_id' value='${id}'>
-                    <button type='submit' class='btn btn-primary'>Сохранить</button>
-                </form>
-            </div>`;
-            modalBg.style.display = 'flex';
-            modalBg.querySelector('.desc-modal-close').onclick = function() {
-                modalBg.style.display = 'none';
-            };
-            modalBg.querySelector('.desc-modal-form').onsubmit = function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                fetch('admin.php', {
-                    method: 'POST',
-                    body: formData
-                }).then(r => r.text()).then(() => { location.reload(); });
-            };
-        }
-        // Цена
-        if (e.target.classList.contains('editable-link') && e.target.dataset.type === 'price') {
-            const id = e.target.getAttribute('data-id');
-            const current = e.target.getAttribute('data-value') || '';
-            const modalBg = document.getElementById('desc-modal-bg');
-            modalBg.innerHTML = `<div class='desc-modal'>
-                <button class='desc-modal-close'>&times;</button>
-                <form class='desc-modal-form'>
-                    <input type='number' name='price' placeholder='Цена' value="${current.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')}">
+                    <input type='text' name='${type}' placeholder='${label}' value="${current.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')}">
                     <input type='hidden' name='product_id' value='${id}'>
                     <button type='submit' class='btn btn-primary'>Сохранить</button>
                 </form>
@@ -1129,6 +1181,55 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         }
     });
+    </script>
+    <script>
+    document.getElementById('openAddModal').onclick = function() {
+      document.getElementById('addProductModal').style.display = 'flex';
+    };
+    document.getElementById('closeAddModal').onclick = function() {
+      document.getElementById('addProductModal').style.display = 'none';
+    };
+    window.addEventListener('click', function(e) {
+      const modal = document.getElementById('addProductModal');
+      if (e.target === modal) modal.style.display = 'none';
+    });
+    </script>
+    <script>
+    (function(){
+      // Универсальная модалка для ввода текста
+      const addModal = document.getElementById('addProductModal');
+      const inputModal = document.getElementById('inputModal');
+      let currentInput = null;
+      let currentLabel = '';
+      // Открытие модалки по клику на input/textarea
+      addModal.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(function(inp){
+        inp.addEventListener('focus', function(e){
+          e.preventDefault();
+          currentInput = this;
+          currentLabel = this.getAttribute('placeholder') || '';
+          document.getElementById('inputModalLabel').textContent = currentLabel;
+          document.getElementById('inputModalTextarea').value = this.value;
+          inputModal.style.display = 'flex';
+          setTimeout(()=>document.getElementById('inputModalTextarea').focus(), 100);
+        });
+        inp.addEventListener('click', function(e){
+          this.blur(); // чтобы не было двойного фокуса
+          this.focus();
+        });
+      });
+      // Сохранение значения
+      document.getElementById('inputModalForm').onsubmit = function(e){
+        e.preventDefault();
+        if(currentInput) currentInput.value = document.getElementById('inputModalTextarea').value;
+        inputModal.style.display = 'none';
+      };
+      document.getElementById('closeInputModal').onclick = function(){
+        inputModal.style.display = 'none';
+      };
+      window.addEventListener('click', function(e){
+        if(e.target === inputModal) inputModal.style.display = 'none';
+      });
+    })();
     </script>
 </body>
 </html> 
