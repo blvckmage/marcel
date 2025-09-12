@@ -13,6 +13,96 @@ if (file_exists($products_file)) {
         $products[$item['id']] = $item;
     }
 }
+// --- Валюта ---
+if (isset($_GET['currency'])) {
+    setcookie('currency', $_GET['currency'], time() + 3600*24*30, '/');
+    $_COOKIE['currency'] = $_GET['currency'];
+    header('Location: order.php');
+    exit;
+}
+$currency = $_COOKIE['currency'] ?? 'KZT';
+
+// Функция для получения актуальных курсов валют
+function getExchangeRates() {
+    $cache_file = __DIR__ . '/exchange_rates_cache.json';
+    $cache_time = 24 * 60 * 60; // 24 часа
+
+    // Проверяем кэш
+    if (file_exists($cache_file) && (time() - filemtime($cache_file)) < $cache_time) {
+        $cached_data = json_decode(file_get_contents($cache_file), true);
+        if ($cached_data && isset($cached_data['rates'])) {
+            return $cached_data['rates'];
+        }
+    }
+
+    // Запасные курсы на случай недоступности API
+    $fallback_rates = [
+        'KZT' => 450,  // 1 USD = 450 KZT
+        'RUB' => 90,   // 1 USD = 90 RUB
+        'USD' => 1     // Базовая валюта
+    ];
+
+    // Попытка получить актуальные курсы из API
+    $api_url = 'https://api.exchangerate-api.com/v4/latest/USD';
+
+    $context = stream_context_create([
+        'http' => [
+            'timeout' => 10, // 10 секунд таймаут
+            'user_agent' => 'rusEFI Shop/1.0'
+        ]
+    ]);
+
+    $api_response = @file_get_contents($api_url, false, $context);
+
+    if ($api_response !== false) {
+        $data = json_decode($api_response, true);
+        if ($data && isset($data['rates'])) {
+            // Извлекаем нужные нам валюты
+            $rates = [
+                'USD' => 1,
+                'RUB' => $data['rates']['RUB'] ?? $fallback_rates['RUB'],
+                'KZT' => $data['rates']['KZT'] ?? $fallback_rates['KZT']
+            ];
+
+            // Сохраняем в кэш с метаданными
+            $cache_data = [
+                'rates' => $rates,
+                'timestamp' => time(),
+                'source' => 'exchangerate-api.com'
+            ];
+            file_put_contents($cache_file, json_encode($cache_data));
+
+            return $rates;
+        }
+    }
+
+    // Если API недоступен, используем запасные значения
+    // Сохраняем в кэш с метаданными
+    $cache_data = [
+        'rates' => $fallback_rates,
+        'timestamp' => time(),
+        'source' => 'fallback'
+    ];
+    file_put_contents($cache_file, json_encode($cache_data));
+
+    return $fallback_rates;
+}
+
+// Получаем актуальные курсы
+$exchange_rates = getExchangeRates();
+
+// Функция конвертации цены (цены хранятся в USD)
+function convertPrice($price_usd, $target_currency, $rates) {
+    if ($target_currency === 'USD') return $price_usd;
+    return round($price_usd * $rates[$target_currency], 2);
+}
+
+// Функция форматирования цены
+function formatPrice($price, $currency) {
+    $symbols = ['KZT' => 'KZT', 'RUB' => '₽', 'USD' => '$'];
+    return number_format($price, 0, '.', ' ') . ' ' . $symbols[$currency];
+}
+
 // --- Язык ---
 if (isset($_GET['lang'])) {
     setcookie('lang', $_GET['lang'], time() + 3600*24*30, '/');
@@ -288,6 +378,7 @@ $texts = [
         <div class="order-cart-list" id="order-cart"></div>
         <form action="send.php" method="post" class="order-form mt-4" id="order-form">
             <input type="hidden" name="cart_json" id="cart_json">
+            <input type="hidden" name="currency" value="<?= $currency ?>">
             <div class="mb-3">
                 <label for="name" class="form-label">
                     <?= $texts[$lang]['name'] ?>
@@ -316,6 +407,8 @@ $texts = [
     </footer>
     <script>
     const lang = "<?= $lang ?>";
+    const currency = "<?= $currency ?>";
+    const exchangeRates = <?php echo json_encode($exchange_rates); ?>;
     const texts = {
         ru: { empty_cart: "Корзина пуста.", qty: "Кол-во:", total: "Итого:" },
         kz: { empty_cart: "Себет бос.", qty: "Саны:", total: "Жалпы:" }
@@ -328,19 +421,22 @@ $texts = [
         let total = 0;
         let hasItems = false;
         products.forEach(p => {
-            const qty = cart[p.id] || 0;
+            const item = cart[p.id];
+            const qty = item?.quantity || 0;
             if (qty > 0) {
                 hasItems = true;
-                const sum = p.price * qty;
+                const priceUSD = item?.price || p.price;
+                const price = convertPrice(priceUSD, currency);
+                const sum = price * qty;
                 total += sum;
                 // Мультиязычность для name/description
-                let name = typeof p.name === 'object' ? (p.name[lang] || p.name['ru'] || '') : p.name;
+                let name = item?.name || (typeof p.name === 'object' ? (p.name[lang] || p.name['ru'] || '') : p.name);
                 let desc = typeof p.description === 'object' ? (p.description[lang] || p.description['ru'] || '') : (p.description || '');
                 html += `<div class='order-cart-card'>
                     <img src='${p.img}' alt='${name}'>
                     <div class='order-cart-info'>
                         <div class='order-cart-title'>${name}</div>
-                        <div class='order-cart-price'>${formatPrice(p.price)}</div>
+                        <div class='order-cart-price'>${formatPrice(price, currency)}</div>
                         <div class='order-cart-desc'>${desc}</div>
                         <div class='order-cart-qty'>${texts[lang].qty} ${qty}</div>
                     </div>
@@ -348,7 +444,7 @@ $texts = [
             }
         });
         if (hasItems) {
-            html += `<div class='order-summary'>${texts[lang].total} <span class='order-total'>${formatPrice(total)}</span></div>`;
+            html += `<div class='order-summary'>${texts[lang].total} <span class='order-total'>${formatPrice(total, currency)}</span></div>`;
         } else {
             html = `<p style=\"text-align:center;font-size:1.2em;\">${texts[lang].empty_cart}</p>`;
             document.getElementById('order-form').style.display = 'none';
@@ -359,11 +455,19 @@ $texts = [
         const cart = getCart();
         document.getElementById('cart_json').value = JSON.stringify(cart);
     }
-    function formatPrice(num) { return Number(num).toLocaleString('ru-RU') + ' KZT'; }
+    function convertPrice(priceUSD, targetCurrency) {
+        if (targetCurrency === 'USD') return priceUSD;
+        return Math.round(priceUSD * exchangeRates[targetCurrency] * 100) / 100;
+    }
+
+    function formatPrice(price, currency) {
+        const symbols = { 'KZT': 'KZT', 'RUB': '₽', 'USD': '$' };
+        return new Intl.NumberFormat('ru-RU').format(price) + ' ' + symbols[currency];
+    }
     function updateCartUI() {
         const cart = getCart();
         let count = 0;
-        for (let id in cart) count += cart[id];
+        for (let id in cart) count += cart[id]?.quantity || 0;
         document.getElementById('cart-count').textContent = count;
     }
     document.addEventListener('DOMContentLoaded', function() {
@@ -378,4 +482,4 @@ $texts = [
     window.addEventListener('storage', function() { renderOrderCart(); updateCartUI(); });
     </script>
 </body>
-</html> 
+</html>

@@ -54,7 +54,7 @@ if (!isset($_SESSION['admin'])) {
             .rusefi-header-menu {
                 display: flex;
                 align-items: center;
-                gap: 32px;
+                gap: 8px;
             }
             .rusefi-header-menu a {
                 color: #181818;
@@ -145,11 +145,14 @@ if (!isset($_SESSION['admin'])) {
     </head>
     <body>
     <header class="rusefi-header">
-        <span class="rusefi-logo">rusEFI</span>
-        <nav class="rusefi-header-menu" style="margin: 0 auto;">
-            <a href="index.php">Магазин</a>
-            <a href="#footer-contacts" id="contacts-link">Контакты</a>
-        </nav>
+        <div style="display: flex; align-items: center;">
+            <span class="rusefi-logo">rusEFI</span>
+            <nav class="rusefi-header-menu">
+                <a href="index.php">Магазин</a>
+                <a href="index.php#contacts">Контакты</a>
+                <a href="forum.php">Форум</a>
+            </nav>
+        </div>
         <a href="index.php" class="btn btn-primary admin-back-btn" style="min-width:110px;text-align:center;">Назад</a>
     </header>
     <div class="admin-login-box">
@@ -165,17 +168,7 @@ if (!isset($_SESSION['admin'])) {
             <button type="submit" class="btn btn-primary" style="width:100%;">Войти</button>
         </form>
     </div>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var contacts = document.getElementById('contacts-link');
-        if (contacts) {
-            contacts.onclick = function(e) {
-                e.preventDefault();
-                document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
-            };
-        }
-    });
-    </script>
+
     </body>
     </html>
     <?php
@@ -199,31 +192,34 @@ if (isset($_POST['add_product'])) {
         'id' => time(),
         'name' => [
             'ru' => trim($_POST['name_ru'] ?? ''),
+            'en' => trim($_POST['name_en'] ?? ''),
             'kz' => trim($_POST['name_kz'] ?? '')
         ],
         'price' => (int)($_POST['price'] ?? 0),
-        'img' => '',
+        'images' => [],
         'description' => [
             'ru' => trim($_POST['desc_ru'] ?? ''),
+            'en' => trim($_POST['desc_en'] ?? ''),
             'kz' => trim($_POST['desc_kz'] ?? '')
         ],
+        'options' => json_decode(trim($_POST['options'] ?? ''), true) ?: []
     ];
-    // Обработка загрузки файла
-    if (isset($_FILES['img_file']) && $_FILES['img_file']['error'] === UPLOAD_ERR_OK) {
-        $ext = strtolower(pathinfo($_FILES['img_file']['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg','jpeg','png','gif','webp'];
-        if (in_array($ext, $allowed)) {
-            $fname = 'images/' . uniqid('img_', true) . '.' . $ext;
-            if (move_uploaded_file($_FILES['img_file']['tmp_name'], $fname)) {
-                $new['img'] = $fname;
+    // Обработка загрузки файлов
+    if (isset($_FILES['img_files'])) {
+        foreach ($_FILES['img_files']['name'] as $key => $name) {
+            if ($_FILES['img_files']['error'][$key] === UPLOAD_ERR_OK) {
+                $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                $allowed = ['jpg','jpeg','png','gif','webp'];
+                if (in_array($ext, $allowed)) {
+                    $fname = 'images/' . uniqid('img_', true) . '.' . $ext;
+                    if (move_uploaded_file($_FILES['img_files']['tmp_name'][$key], $fname)) {
+                        $new['images'][] = $fname;
+                    }
+                }
             }
         }
     }
-    // Если не загружали файл — используем текстовое поле
-    if (!$new['img']) {
-        $new['img'] = trim($_POST['img'] ?? '');
-    }
-    if ($new['name']['ru'] && $new['name']['kz'] && $new['price'] > 0 && $new['img']) {
+    if ($new['name']['ru'] && $new['name']['kz'] && $new['price'] > 0 && !empty($new['images'])) {
         $products[] = $new;
         file_put_contents($products_file, json_encode($products, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
@@ -245,11 +241,18 @@ if (isset($_POST['delete_product']) && isset($_POST['product_id'])) {
     exit;
 }
 // Обновление только названия или цены товара (AJAX)
-if (isset($_POST['product_id']) && (!empty($_POST['name']) || isset($_POST['price'])) && !isset($_POST['edit_product'])) {
+if (isset($_POST['product_id']) && (!empty($_POST['name_ru']) || !empty($_POST['name_en']) || !empty($_POST['name_kz']) || !empty($_POST['desc_ru']) || !empty($_POST['desc_en']) || !empty($_POST['desc_kz']) || isset($_POST['price'])) && !isset($_POST['edit_product'])) {
     $id = (int)$_POST['product_id'];
     foreach ($products as &$p) {
         if ($p['id'] === $id) {
-            if (isset($_POST['name'])) $p['name'] = trim($_POST['name']);
+            if (!is_array($p['name'])) $p['name'] = ['ru'=>$p['name'],'en'=>'','kz'=>''];
+            if (!is_array($p['description'])) $p['description'] = ['ru'=>$p['description'],'en'=>'','kz'=>''];
+            if (isset($_POST['name_ru'])) $p['name']['ru'] = trim($_POST['name_ru']);
+            if (isset($_POST['name_en'])) $p['name']['en'] = trim($_POST['name_en']);
+            if (isset($_POST['name_kz'])) $p['name']['kz'] = trim($_POST['name_kz']);
+            if (isset($_POST['desc_ru'])) $p['description']['ru'] = trim($_POST['desc_ru']);
+            if (isset($_POST['desc_en'])) $p['description']['en'] = trim($_POST['desc_en']);
+            if (isset($_POST['desc_kz'])) $p['description']['kz'] = trim($_POST['desc_kz']);
             if (isset($_POST['price'])) $p['price'] = (int)$_POST['price'];
         }
     }
@@ -263,13 +266,16 @@ if (isset($_POST['edit_product']) && isset($_POST['product_id'])) {
     foreach ($products as &$p) {
         if ($p['id'] === $id) {
             // Миграция старых товаров
-            if (!is_array($p['name'])) $p['name'] = ['ru'=>$p['name'],'kz'=>''];
-            if (!is_array($p['description'])) $p['description'] = ['ru'=>$p['description'],'kz'=>''];
+            if (!is_array($p['name'])) $p['name'] = ['ru'=>$p['name'],'en'=>'','kz'=>''];
+            if (!is_array($p['description'])) $p['description'] = ['ru'=>$p['description'],'en'=>'','kz'=>''];
             $p['name']['ru'] = trim($_POST['name_ru'] ?? $p['name']['ru']);
+            $p['name']['en'] = trim($_POST['name_en'] ?? $p['name']['en']);
             $p['name']['kz'] = trim($_POST['name_kz'] ?? $p['name']['kz']);
             $p['price'] = (int)($_POST['price'] ?? $p['price']);
             $p['description']['ru'] = trim($_POST['desc_ru'] ?? $p['description']['ru']);
+            $p['description']['en'] = trim($_POST['desc_en'] ?? $p['description']['en']);
             $p['description']['kz'] = trim($_POST['desc_kz'] ?? $p['description']['kz']);
+            $p['options'] = json_decode(trim($_POST['options'] ?? ''), true) ?: $p['options'];
             // Обработка загрузки файла
             if (isset($_FILES['img_file']) && $_FILES['img_file']['error'] === UPLOAD_ERR_OK) {
                 $ext = strtolower(pathinfo($_FILES['img_file']['name'], PATHINFO_EXTENSION));
@@ -386,6 +392,12 @@ function sort_link($label, $field, $tab, $sort, $order) {
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
     <style>
         :root {
+            --header-bg: #ff6600;
+            --main-bg: #2a2a2a;
+            --text-white: #ffffff;
+            --text-orange: #ff6600;
+            --text-black: #000000;
+            --border-color: #444444;
             --rusefi-orange: #ff7a1a;
             --rusefi-dark: #232629;
             --rusefi-card: #282b2f;
@@ -398,6 +410,203 @@ function sort_link($label, $field, $tab, $sort, $order) {
             font-family: 'Inter', Arial, Helvetica, sans-serif;
             margin: 0;
             padding: 0;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .burger-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+        .burger-line {
+            width: 24px;
+            height: 2px;
+            background: var(--text-black);
+            transition: 0.3s;
+        }
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--header-bg);
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .mobile-menu.open {
+            display: block;
+        }
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .mobile-nav-link {
+            color: var(--text-black);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .mobile-nav-link:hover {
+            color: var(--text-orange);
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .rusefi-text {
+            color: var(--text-black);
+        }
+        .efi-text {
+            color: var(--text-orange);
+            font-weight: bold;
+            -webkit-text-stroke: 1px var(--text-black);
+            text-stroke: 1px var(--text-black);
+        }
+        .main-nav {
+            display: flex;
+            gap: 30px;
+        }
+        .nav-link {
+            color: var(--text-black);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-black);
+        }
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--text-orange);
+        }
+        .cart-section {
+            position: relative;
+        }
+        .cart-link {
+            color: var(--text-black);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cart-icon {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: var(--text-black);
+            stroke-width: 1.5;
+        }
+        .cart-count {
+            background: var(--text-orange);
+            color: var(--text-black);
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: bold;
+            min-width: 18px;
+            min-height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .currency-switcher {
+            position: relative;
+        }
+        .currency-switcher select {
+            background: var(--text-black);
+            color: var(--text-white);
+            border: 2px solid var(--text-black);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+            padding-right: 32px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .currency-switcher select:hover {
+            background-color: #333;
+            border-color: var(--text-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .currency-switcher select:focus {
+            outline: none;
+            border-color: var(--text-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+        }
+        .currency-switcher select option {
+            background: var(--text-black);
+            color: var(--text-white);
+            padding: 8px;
+        }
+        .lang-switcher {
+            position: relative;
+        }
+        .lang-switcher select {
+            background: var(--text-black);
+            color: var(--text-white);
+            border: 2px solid var(--text-black);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+            padding-right: 32px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .lang-switcher select:hover {
+            background-color: #333;
+            border-color: var(--text-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .lang-switcher select:focus {
+            outline: none;
+            border-color: var(--text-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+        }
+        .lang-switcher select option {
+            background: var(--text-black);
+            color: var(--text-white);
+            padding: 8px;
         }
         .rusefi-header {
             background: var(--rusefi-orange);
@@ -418,7 +627,7 @@ function sort_link($label, $field, $tab, $sort, $order) {
         .rusefi-header-menu {
             display: flex;
             align-items: center;
-            gap: 32px;
+            gap: 8px;
         }
         .rusefi-header-menu a {
             color: #181818;
@@ -693,6 +902,35 @@ function sort_link($label, $field, $tab, $sort, $order) {
             font-size: 1rem;
             padding: 10px 0;
         }
+        @media (max-width: 768px) {
+            .rusefi-header { padding: 16px 20px; }
+            .main-nav { display: none; }
+            .burger-menu { display: flex; }
+            .header-right { gap: 15px; }
+            .cart-icon { width: 20px; height: 20px; }
+            .currency-switcher select,
+            .lang-switcher select {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .rusefi-main { padding: 32px 20px; }
+            .rusefi-title { font-size: 2.2rem; margin-bottom: 32px; }
+        }
+        @media (max-width: 480px) {
+            .rusefi-header { padding: 12px 16px; }
+            .rusefi-logo { font-size: 1.5rem; }
+            .main-nav { display: none; }
+            .nav-link { font-size: 0.9rem; }
+            .header-right { gap: 10px; }
+            .cart-icon { width: 18px; height: 18px; }
+            .currency-switcher select,
+            .lang-switcher select {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+            .rusefi-main { padding: 24px 16px; }
+            .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
+        }
         @media (max-width: 600px) {
             .rusefi-header { padding: 0 10px; height: 48px; }
             .rusefi-logo { font-size: 1.3rem; }
@@ -895,12 +1133,58 @@ function sort_link($label, $field, $tab, $sort, $order) {
 </head>
 <body>
     <header class="rusefi-header">
-        <span class="rusefi-logo">rusEFI</span>
-        <nav class="rusefi-header-menu" style="margin: 0 auto;">
-            <a href="index.php">Магазин</a>
-            <a href="#footer-contacts" id="contacts-link">Контакты</a>
-        </nav>
-        <a href="admin.php?logout=1" class="btn btn-secondary admin-logout-btn" style="min-width:110px;text-align:center;">Выйти</a>
+        <div class="header-content">
+            <div class="logo">
+                <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
+            </div>
+            <nav class="main-nav">
+                <a href="index.php" class="nav-link">Магазин</a>
+                <a href="#" class="nav-link" id="contacts-link">Контакты</a>
+                <a href="forum.php" class="nav-link">Форум</a>
+            </nav>
+            <div class="header-right">
+                <div class="currency-switcher">
+                    <form method="get" style="margin:0;padding:0;display:inline;">
+                        <select name="currency" onchange="this.form.submit()">
+                            <option value="KZT" selected>KZT</option>
+                            <option value="RUB">RUB</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="lang-switcher">
+                    <form method="get" style="margin:0;padding:0;display:inline;">
+                        <select name="lang" onchange="this.form.submit()">
+                            <option value="ru" selected>RU</option>
+                            <option value="kz">KZ</option>
+                            <option value="en">EN</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="cart-section">
+                    <a href="cart.php" class="cart-link">
+                        <svg viewBox="0 0 24 24" class="cart-icon">
+                            <circle cx="9" cy="21" r="1"/>
+                            <circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg>
+                        <span id="cart-count" class="cart-count">0</span>
+                    </a>
+                </div>
+                <div class="burger-menu" onclick="toggleMobileMenu()">
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                </div>
+            </div>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <nav class="mobile-nav">
+                <a href="index.php" class="mobile-nav-link">Магазин</a>
+                <a href="#" class="mobile-nav-link" onclick="document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'}); toggleMobileMenu();">Контакты</a>
+                <a href="forum.php" class="mobile-nav-link">Форум</a>
+            </nav>
+        </div>
     </header>
     <main class="rusefi-main">
     <div class="admin-toggle-group mb-4">
@@ -958,15 +1242,15 @@ function sort_link($label, $field, $tab, $sort, $order) {
                         <td>
                             <ul class="mb-0">
                                 <?php foreach ($order['items'] as $item): ?>
-                                    <li><?php 
+                                    <li><?php
 $name = $item['name'];
 if (is_array($name)) $name = $name['ru'];
-echo htmlspecialchars($name); 
-?> x <?php echo $item['qty']; ?> (<?php echo number_format($item['price'], 0, '', ' '); ?> KZT)</li>
+echo htmlspecialchars($name);
+?> x <?php echo $item['qty']; ?> (<?php echo number_format($item['price'], 0, '', ' '); ?> USD)</li>
                                 <?php endforeach; ?>
                             </ul>
                         </td>
-                        <td><?php echo number_format($order['total'], 0, '', ' '); ?> KZT</td>
+                        <td><?php echo number_format($order['total'], 0, '', ' '); ?> USD</td>
                         <td>
                             <form method="post" class="d-flex flex-column gap-2">
                                 <input type="hidden" name="order_id" value="<?php echo $real_id; ?>">
@@ -1000,11 +1284,18 @@ echo htmlspecialchars($name);
         <form class="admin-add-form" method="post" enctype="multipart/form-data">
           <div style="display:flex;flex-direction:column;gap:10px;">
             <input type="text" class="form-control" name="name_ru" placeholder="Название (рус)" required>
+            <input type="text" class="form-control" name="name_en" placeholder="Name (en)">
             <input type="text" class="form-control" name="name_kz" placeholder="Атауы (қаз)" required>
             <input type="number" class="form-control" name="price" placeholder="Цена" min="1" required>
-            <input type="file" class="input-file" name="img_file" accept="image/*">
+            <input type="file" class="input-file" name="img_files[]" accept="image/*" multiple>
             <input type="text" class="form-control" name="desc_ru" placeholder="Описание (рус)">
+            <input type="text" class="form-control" name="desc_en" placeholder="Description (en)">
             <input type="text" class="form-control" name="desc_kz" placeholder="Сипаттамасы (қаз)">
+            <div style="margin-bottom: 12px;">
+                <label style="color: #fff; font-weight: 500; margin-bottom: 6px; display: block;">Опции модификации</label>
+                <textarea class="form-control" name="options" placeholder='Пример: [{"name": "Цвет", "values": ["Красный", "Синий"]}, {"name": "Размер", "values": ["S", "M", "L"]}]' style="min-height: 150px; font-family: 'Courier New', monospace; font-size: 0.9rem; background: #1a1a1a; border: 2px solid #555; border-radius: 12px; color: #fff; padding: 16px; resize: vertical; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: border-color 0.3s, box-shadow 0.3s;"></textarea>
+                <small style="color: #ccc; font-size: 0.8rem;">Введите JSON массив с опциями товара</small>
+            </div>
           </div>
           <button type="submit" name="add_product" class="btn btn-success w-100 mt-3">Добавить</button>
         </form>
@@ -1071,10 +1362,11 @@ echo htmlspecialchars($name);
                         <form method="post" enctype="multipart/form-data" class="align-middle">
                             <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
                             <td><?php echo $i + 1; ?></td>
-                            <td><?php if ($p['img']): ?><img src="<?php echo htmlspecialchars($p['img']); ?>" class="preview-img" alt="img"><?php endif; ?></td>
+                            <td><?php if (!empty($p['images']) && is_array($p['images'])): ?><img src="<?php echo htmlspecialchars($p['images'][0]); ?>" class="preview-img" alt="img"><?php endif; ?></td>
                             <td class="name-col">
                                 <?php $curLang = $_COOKIE['lang'] ?? 'ru'; ?>
                                 <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="name_ru" data-value="<?php echo htmlspecialchars(is_array($p['name'])?$p['name']['ru']:$p['name']); ?>">RU: <?php echo htmlspecialchars(is_array($p['name'])?$p['name']['ru']:$p['name']); ?></span>
+                                <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="name_en" data-value="<?php echo htmlspecialchars(is_array($p['name'])?$p['name']['en']:''); ?>">EN: <?php echo htmlspecialchars(is_array($p['name'])?$p['name']['en']:''); ?></span>
                                 <span class="editable-link" data-id="<?php echo $p['id']; ?>" data-type="name_kz" data-value="<?php echo htmlspecialchars(is_array($p['name'])?$p['name']['kz']:''); ?>">KZ: <?php echo htmlspecialchars(is_array($p['name'])?$p['name']['kz']:''); ?></span>
                             </td>
                             <td>
@@ -1088,6 +1380,7 @@ echo htmlspecialchars($name);
                             </td>
                             <td class="desc-col">
                                 <span class="desc-link" data-id="<?php echo $p['id']; ?>" data-type="desc_ru" data-desc="<?php echo htmlspecialchars(is_array($p['description'])?$p['description']['ru']:$p['description']); ?>">RU: <?php echo htmlspecialchars(is_array($p['description'])?$p['description']['ru']:$p['description']); ?></span>
+                                <span class="desc-link" data-id="<?php echo $p['id']; ?>" data-type="desc_en" data-desc="<?php echo htmlspecialchars(is_array($p['description'])?$p['description']['en']:''); ?>">EN: <?php echo htmlspecialchars(is_array($p['description'])?$p['description']['en']:''); ?></span>
                                 <span class="desc-link" data-id="<?php echo $p['id']; ?>" data-type="desc_kz" data-desc="<?php echo htmlspecialchars(is_array($p['description'])?$p['description']['kz']:''); ?>">KZ: <?php echo htmlspecialchars(is_array($p['description'])?$p['description']['kz']:''); ?></span>
                             </td>
                             <td>
@@ -1104,37 +1397,24 @@ echo htmlspecialchars($name);
         </div>
     <?php endif; ?>
 </div>
-<footer id="footer-contacts" style="background:#232629;color:#bbb;text-align:center;padding:24px 0 12px 0;font-size:1rem;border-top:1px solid #333;">
-    <div style="margin-bottom:8px;font-size:1.15em;">
-        Телефон для связи: <a href="tel:+77001234567" style="color:#ff7a1a;">+7 (700) 123-45-67</a>
-    </div>
-    &copy; <?php echo date('Y'); ?> rusEFI — <a href="https://www.shop.rusefi.com" style="color:#ff7a1a;">rusefi.com</a>
-</footer>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var contacts = document.getElementById('contacts-link');
-    if (contacts) {
-        contacts.onclick = function(e) {
-            e.preventDefault();
-            document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
-        };
-    }
-});
-</script>
+</div>
     <div id="desc-modal-bg" style="display:none;"></div>
     <script>
     document.addEventListener('click', function(e) {
-        // Описание RU/KZ
+        // Описание RU/EN/KZ
         if (e.target.classList.contains('desc-link')) {
             const id = e.target.getAttribute('data-id');
             const type = e.target.getAttribute('data-type');
             const current = e.target.getAttribute('data-desc') || '';
             const modalBg = document.getElementById('desc-modal-bg');
-            let label = type === 'desc_kz' ? 'Сипаттамасы (қаз)' : 'Описание (рус)';
+            let label = '';
+            if (type === 'desc_kz') label = 'Сипаттамасы (қаз)';
+            else if (type === 'desc_en') label = 'Description (en)';
+            else label = 'Описание (рус)';
             modalBg.innerHTML = `<div class='desc-modal'>
                 <button class='desc-modal-close'>&times;</button>
                 <form class='desc-modal-form'>
-                    <textarea name='${type}' placeholder='${label}'>${current.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                    <textarea name='${type}' placeholder='${label}'>${current.replace(/</g, '<').replace(/>/g, '>')}</textarea>
                     <input type='hidden' name='product_id' value='${id}'>
                     <button type='submit' class='btn btn-primary'>Сохранить</button>
                 </form>
@@ -1152,17 +1432,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).then(r => r.text()).then(() => { location.reload(); });
             };
         }
-        // Название RU/KZ
+        // Название RU/EN/KZ
         if (e.target.classList.contains('editable-link')) {
             const id = e.target.getAttribute('data-id');
             const type = e.target.getAttribute('data-type');
             const current = e.target.getAttribute('data-value') || '';
             const modalBg = document.getElementById('desc-modal-bg');
-            let label = type === 'name_kz' ? 'Атауы (қаз)' : 'Название (рус)';
+            let label = '';
+            if (type === 'name_kz') label = 'Атауы (қаз)';
+            else if (type === 'name_en') label = 'Name (en)';
+            else label = 'Название (рус)';
             modalBg.innerHTML = `<div class='desc-modal'>
                 <button class='desc-modal-close'>&times;</button>
                 <form class='desc-modal-form'>
-                    <input type='text' name='${type}' placeholder='${label}' value="${current.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>')}">
+                    <input type='text' name='${type}' placeholder='${label}' value="${current.replace(/"/g, '"').replace(/</g, '<').replace(/>/g, '>')}">
                     <input type='hidden' name='product_id' value='${id}'>
                     <button type='submit' class='btn btn-primary'>Сохранить</button>
                 </form>
@@ -1195,6 +1478,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     </script>
     <script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('open');
+    }
+
+    function updateCartUI() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '{}');
+        let count = 0;
+        for (let id in cart) count += cart[id]?.quantity || 0;
+        document.getElementById('cart-count').textContent = count;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartUI();
+        document.getElementById('contacts-link').onclick = function(e) {
+            e.preventDefault();
+            document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
+        };
+    });
+
+    window.addEventListener('storage', function() { updateCartUI(); });
+
     (function(){
       // Универсальная модалка для ввода текста
       const addModal = document.getElementById('addProductModal');
@@ -1232,4 +1537,4 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
     </script>
 </body>
-</html> 
+</html>

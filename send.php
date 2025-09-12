@@ -4,6 +4,29 @@ if (empty($_POST['name']) || empty($_POST['phone']) || empty($_POST['cart_json']
     header('Location: order.php');
     exit;
 }
+$lang = $_COOKIE['lang'] ?? 'ru';
+$texts = [
+    'ru' => [
+        'shop' => 'Магазин',
+        'contacts' => 'Контакты',
+        'cart' => 'Корзина',
+        'order_sent' => 'Заявка отправлена!',
+        'thanks' => 'Спасибо за заказ! Мы свяжемся с вами в ближайшее время.',
+        'back_to_shop' => 'Вернуться в магазин',
+        'phone_label' => 'Телефон для связи:',
+    ],
+    'kz' => [
+        'shop' => 'Дүкен',
+        'contacts' => 'Байланыс',
+        'cart' => 'Себет',
+        'order_sent' => 'Өтінім жіберілді!',
+        'thanks' => 'Тапсырыс үшін рахмет! Біз сізбен жақын арада байланысамыз.',
+        'back_to_shop' => 'Дүкенге оралу',
+        'phone_label' => 'Байланыс телефоны:',
+    ]
+];
+$lang = $_COOKIE['lang'] ?? 'ru';
+$currency = $_POST['currency'] ?? 'KZT';
 $name = trim($_POST['name']);
 $phone = trim($_POST['phone']);
 $cart = json_decode($_POST['cart_json'], true) ?: [];
@@ -22,22 +45,31 @@ if (file_exists($products_file)) {
 }
 $order_items = [];
 $total = 0;
-foreach ($cart as $id => $qty) {
+foreach ($cart as $id => $item) {
     if (isset($products[$id])) {
+        $qty = is_array($item) ? $item['quantity'] : $item;
+        $price = is_array($item) ? $item['price'] : $products[$id]['price'];
         $order_items[] = [
             'id' => $id,
-            'name' => $products[$id]['name'],
-            'price' => $products[$id]['price'],
+            'name' => is_array($item) ? $item['name'] : $products[$id]['name'],
+            'price' => $price,
             'qty' => $qty,
         ];
-        $total += $products[$id]['price'] * $qty;
+        $total += $price * $qty;
     }
 }
+// Функция форматирования цены
+function formatPrice($price, $currency) {
+    $symbols = ['KZT' => 'KZT', 'RUB' => '₽', 'USD' => '$'];
+    return number_format($price, 0, '.', ' ') . ' ' . $symbols[$currency];
+}
+
 $order = [
     'name' => $name,
     'phone' => $phone,
     'items' => $order_items,
     'total' => $total,
+    'currency' => $currency,
     'date' => date('Y-m-d H:i:s'),
 ];
 // Сохраняем заказ в orders.json
@@ -51,17 +83,18 @@ file_put_contents($file, json_encode($orders, JSON_UNESCAPED_UNICODE | JSON_PRET
 // Отправляем в Telegram
 $token = '7780369036:AAHDgni9RQnp9uzTcnsGzAUk8413Zrd38oo';
 $chat_id = '7457764790';
-$message = "Новая заявка:\nИмя: $name\nТелефон: $phone\n";
+$message = "Новая заявка:\nИмя: $name\nТелефон: $phone\nВалюта: $currency\n";
 foreach ($order_items as $item) {
-    $message .= "{$item['name']} x {$item['qty']} = " . ($item['price'] * $item['qty']) . "₽\n";
+    $item_name = is_array($item['name']) ? ($item['name'][$lang] ?? $item['name']['ru'] ?? '') : $item['name'];
+    $message .= "$item_name x {$item['qty']} = " . formatPrice($item['price'] * $item['qty'], 'USD') . "\n";
 }
-$message .= "Итого: $total ₽";
+$message .= "Итого: " . formatPrice($total, 'USD');
 if ($chat_id) {
     file_get_contents("https://api.telegram.org/bot$token/sendMessage?chat_id=$chat_id&text=" . urlencode($message));
 }
 ?>
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="<?= $lang ?>">
 <head>
     <meta charset="UTF-8">
     <title>Заявка отправлена — rusEFI</title>
@@ -231,7 +264,7 @@ if ($chat_id) {
     function updateCartUI() {
         const cart = getCart();
         let count = 0;
-        for (let id in cart) count += cart[id];
+        for (let id in cart) count += cart[id]?.quantity || 0;
         document.getElementById('cart-count').textContent = count;
     }
     document.addEventListener('DOMContentLoaded', function() {
@@ -245,4 +278,4 @@ if ($chat_id) {
     window.addEventListener('storage', function() { updateCartUI(); });
     </script>
 </body>
-</html> 
+</html>

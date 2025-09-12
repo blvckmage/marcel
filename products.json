@@ -1,28 +1,72 @@
 [
     {
-        "id": 1753123490,
+        "id": "hellen-88-bmw",
         "name": {
-            "ru": "Arduino Uno R3",
-            "kz": "Arduino Uno R3"
+            "ru": "Hellen 88 BMW",
+            "en": "Hellen 88 BMW",
+            "kz": "Hellen 88 BMW"
         },
-        "price": 15000,
-        "img": "images\/img_687e8aa26b2be1.22906082.jpeg",
+        "price": 750,
+        "images": ["images/hellenbmw1.jpg", "images/hellenbmw2.jpg"],
         "description": {
-            "ru": "Arduino Uno контроллер построен на ATmega328. Платформа имеет 14 цифровых вход\/выходов (6 из которых могут использоваться как выходы ШИМ), 6 аналоговых входов, кварцевый генератор 16 МГц, разъем USB, силовой разъем, разъем ICSP и кнопку перезагрузки. Для работы необходимо подключить платформу к компьютеру посредством кабеля USB, либо подать питание при помощи адаптера AC\/DC или батареи.",
-            "kz": "Arduino Uno контроллер atmega328-де салынған. Платформада 14 сандық кіріс \/ шығыс (оның 6-сы PWM шығысы ретінде пайдаланылуы мүмкін), 6 аналогтық кіріс, 16 МГц кварц генераторы, USB қосқышы, қуат қосқышы, ICSP қосқышы және қайта жүктеу түймесі бар. Жұмыс істеу үшін платформаны компьютерге USB кабелі арқылы қосу керек немесе AC\/DC адаптерін немесе батареяны пайдаланып қуат беру керек."
-        }
+            "ru": "Плата разработки блока управления двигателем BMW Hellen 88\n\nИзвестно, что эта плата разработки подходит для запуска BMW e36 с ЭБУ Bosch 3.x.\n\nОБЪЯВЛЕНИЕ ОБ ИСПОЛЬЗОВАНИИ НА ВНЕДОРОЖЬЕ: товары, продаваемые через rusEFI LLC, включая тюнинговые продукты, могут быть предназначены только для использования на бездорожье/в гоночных условиях и не подходят для автомобилей в штатах, где действуют правила контроля выбросов. Калифорния (CARB) и другие штаты запрещают продажу или использование некоторых деталей, изготовленных на вторичном рынке, включая те, которые вносят изменения, модифицируют или блокируют работу систем выпуска отработавших газов в любых автомобилях 1966 года выпуска и новее. rusEFI LLC запрещает использование этих деталей на автомобилях с контролем выбросов. Эти детали продаются только для использования на ВНЕДОРОЖЬЕ, ТОЛЬКО В ГОНОЧНЫХ и наземных транспортных средствах в контролируемых условиях.\n\nrusEFI LLC не подтверждает ни прямо, ни косвенно законность использования какой-либо продаваемой ею продукции на дорогах общего пользования. Клиенты несут исключительную ответственность за обеспечение законного использования всех приобретенных товаров.",
+            "en": "rusEFI Hellen 88 BMW ECU development board\n\nThat's a development board which is known to start an e36 BMW with Bosch 3.x ECU\n\n\n\nOFF ROAD USE NOTICE: items sold through rusEFI LLC including tuning products may be designed for off-road/race use only, and are not applicable for vehicles in states that require pollution controlled vehicles. California (CARB) & other states prohibit the sale or use of some aftermarket parts, including those that tamper with, modify or defeat emissions systems in any 1966 and newer vehicles. rusEFI LLC prohibits the use of these products on emission controlled vehicles. These parts are sold for OFF ROAD, RACE-ONLY, ground-vehicle use only in a controlled environment.\n\nrusEFI LLC does not implicitly or explicitly confirm the legality of using any products it sells on public roads. Customers are solely responsible for ensuring all products purchased are used in a legal manner.",
+            "kz": "BMW Hellen 88 ECU әзірлеу тақтасы\n\nБұл әзірлеу тақтасы Bosch 3.x ECU бар BMW e36-ны басқаратыны белгілі.\n\nЖОЛДАН ЖОЛДА ПАЙДАЛАНУДАН БАС ТАРТУ: rusEFI LLC арқылы сатылатын заттар, соның ішінде тюнинг өнімдері жол талғамайтын/жарыс үшін ғана арналған болуы мүмкін және шығарындылары бақыланатын мемлекеттерде пайдалануға жарамсыз. Калифорния (CARB) және басқа штаттар кез келген 1966 немесе одан кейінгі көлікте шығарылған шығару жүйесінің жұмысын өзгертетін, түрлендіретін немесе өшіретін бөлшектерді қоса, нарықтан кейінгі кейбір бөлшектерді сатуға немесе пайдалануға тыйым салады. rusEFI LLC осы бөлшектерді шығарындылары бақыланатын көліктерде пайдалануға тыйым салады. Бұл бөліктер ТЕК бақыланатын жағдайларда ЖОЛДАУ, ЖАРЫС және жердегі көлік құралдарын пайдалану үшін сатылады.\n\nrusEFI LLC өзі сататын кез келген өнімнің көше заңдылығын тікелей немесе жанама түрде қолдамайды. Сатып алынған барлық заттардың жалпыға ортақ жолдарда пайдалануға заңды екендігіне тұтынушылардың өзі жауапты."
+        },
+        "category": "hellen-boards",
+        "price_type": "fixed"
     },
     {
-        "id": 1753123557,
+        "id": "ultra-affordable-efi-121",
         "name": {
-            "ru": "STM32 F103C8T6",
-            "kz": "STM32 F103C8T6"
+            "ru": "Ultra Affordable EFI 121 pin",
+            "en": "Ultra Affordable EFI 121 pin",
+            "kz": "Ultra Affordable EFI 121 pin"
         },
-        "price": 15000,
-        "img": "images\/img_687e8ae52a5063.69972044.jpeg",
+        "price": 250,
+        "images": ["images/uaefi121-pcb.jpg", "images/uaefi121-enclosure.jpg", "images/crimp-kit.jpg"],
         "description": {
-            "ru": "STM32 — семейство 32-битных микроконтроллеров производства STMicroelectronics. Чипы STM32 группируются в серии, в рамках каждой из которых используется одно и то же 32-битное ядро ARM, например, Cortex-M7F, Cortex-M4F, Cortex-M3, Cortex-M0+ или Cortex-M0. Каждый микроконтроллер состоит из ядра процессора, статической RAM-памяти, флеш-памяти, отладочного и различных периферийных интерфейсов.",
-            "kz": "STM32-STMicroelectronics шығарған 32 биттік микроконтроллерлер тобы. STM32 чиптері Cortex-M7F, Cortex-M4F, Cortex-M3, Cortex-M0+ немесе Cortex-M0 сияқты әрқайсысы бірдей 32 биттік ARM ядросын қолданатын серияларға топтастырылған. Әрбір микроконтроллер процессор ядросынан, статикалық жедел жадтан, флэш-жадтан, жөндеуден және әртүрлі перифериялық интерфейстерден тұрады."
-        }
+            "ru": "uaEFI121 - это много ECU, упакованное в металлический корпус!\n\nДвойной привод по проводам\nДвойной бортовой контроллер широкополосного зонда\n8-канальная последовательная инъекция\n6-канальное последовательное зажигание\nПОКА НЕТ ЛОГИРОВАНИЯ НА SD-КАРТУ!\n\nОпции:\n- Базовая комплектация: $250\n- С обжимным комплектом: +$45\n- С металлическим корпусом и USB-B: +$75",
+            "en": "uaEFI121 is a lot of ECU packed into a metal enclosure!\n\nDual drive by wire\nDual on-board wideband controller\n8 channel sequential injection\n6 channel sequential ignition\nNO SD CARD logging right now!\n\nOptions:\n- Base configuration: $250\n- With crimp kit: +$45\n- With metal enclosure and USB-B: +$75",
+            "kz": "uaEFI121 - бұл көп ECU, металл корпусқа қапталған!\n\nҚос жүргізу сым бойынша\nҚос бортовой кең жолақты зонд контроллері\n8 арналы тізбекті инъекция\n6 арналы тізбекті тұтандыру\nҚАЗІР SD-КАРТА ЛОГИРОВАНИЯ ЖОҚ!\n\nОпциялар:\n- Негізгі конфигурация: $250\n- Обжимдік комплектпен: +$45\n- Металл корпус және USB-B бар: +$75"
+        },
+        "category": "uaefi-boards",
+        "price_type": "starting"
+    },
+    {
+        "id": "uaefi-ultra-affordable",
+        "name": {
+            "ru": "uaEFI Ultra Affordable EFI",
+            "en": "uaEFI Ultra Affordable EFI",
+            "kz": "uaEFI Ultra Affordable EFI"
+        },
+        "price": 175,
+        "images": ["images/base-bottom.jpg", "images/base-top.jpg", "images/premium-bottom.jpg", "images/premium-top.jpg", 
+    "images/uaefi-a-back.jpg", "images/uaefi-a-top.jpg", "images/with-headers.jpg", "images/without-headers.jpg",
+    "images/with-crimp-kit.jpg", "images/orange.jpg", "images/PRO.jpg", "images/pro-wires.jpg", "images/pro-kit.jpg"],
+        "description": {
+            "ru": "Ультрадоступный электронный впрыск uaEFI\n\nот $175,00\n\nДа, это готовый к использованию автономный ЭБУ с последовательным подключением 6x6 каналов зажигания/впрыска!\n\nПоставляется со встроенным контроллером LSU WBO 4.9, поддерживает два DBW и запись на SD-карту!\n\n x2 входа VR\n\nДвойной драйвер постоянного тока для ETB + перепускного клапана или шагового двигателя в режиме ожидания\n\n*** ВАМ ПРИДЕТСЯ САМИ НАЙТИ И ПРИПАЯТЬ ВСТРОЕННЫЙ ДАТЧИК MAP НА ВАШ ВЫБОР, если это необходимо ***\n\nБез разъёмов Molex: вы можете припаять всё, что захотите\n\nС разъёмами Molex: вы можете перейти на нашу проводку или найти собственные ответные части\n\nСКИДКА ЗА ОПТОВУЮ ПОКУПКУ: ЗАКАЖИТЕ 3 — получите 4!",
+            "en": "uaEFI Ultra Affordable EFI\nfrom $175.00\nYes it's a ready to roll 6x6 sequential channels ignition/injection standalone ECU!\n\nComes with on-board 4.9 LSU WBO controller, supports dual DBW out of the box and on-board SD card logging!\n\nx2 VR inputs\n\ndual DC driver for ETB + wastegate or stepper idle\n\n*** YOU WOULD HAVE TO SOURCE & SOLDER YOUR CHOICE OF ON-BOARD MAP SENSOR if so desired ***\n\nWithout molex headers: you solder anything you want to solder\n\nWith molex headers: you upgrade to our harness or source your own mating plugs\n\nBULK DISCOUNT: ORDER 3 get 4!",
+            "kz": "Өте қолжетімді uaEFI электронды отын бүрку\n\n175,00 доллардан бастап\n\nИә, бұл тұтану/инъекция арналарының 6x6 сериялық қосылымы бар пайдалануға дайын дербес ECU!\n\nБіріктірілген LSU WBO 4.9 контроллерімен бірге келеді, екі DBW қолдайды және SD картасына жазады!\n\nx2 VR кірістері\n\nКүту режимінде ETB + айналма клапан немесе қадамдық қозғалтқыш үшін қос тұрақты ток драйвері\n\n***Қажет болса, СІЗ ТАҢДАУЫҢЫЗДА БОЛАТЫН БОРТЫҚ КАРТА СЕНСОРЫН ТАБУ ЖӘНЕ ДӘНІЛЕУ КЕРЕК***\n\nMolex қосқыштары жоқ: сіз қалағаныңызды дәнекерлей аласыз\n\nMolex қосқыштарымен: сіз біздің сымға ауыса аласыз немесе өзіңіздің түйісетін бөлшектеріңізді таба аласыз\n\nТОЛЫМДЫ ЖЕҢІЛДІК: 3 ТАПСЫРЫС, 4 АЛ!"
+        },
+        "category": "uaefi-boards",
+        "price_type": "starting"
+    },
+    {
+        "id": "hellen-121-nissan",
+        "name": {
+            "ru": "Hellen 121 Nissan",
+            "en": "Hellen 121 Nissan",
+            "kz": "Hellen 121 Nissan"
+        },
+        "price": 650,
+        "images": ["images/hellen121nissan.jpg"],
+        "description": {
+            "ru": "Плата разработки Hellen 121 специально разработана для автомобилей Nissan. Поддерживает современные системы управления двигателем и обеспечивает высокую производительность.",
+            "en": "Hellen 121 development board specially designed for Nissan vehicles. Supports modern engine management systems and ensures high performance.",
+            "kz": "Nissan көліктері үшін арнайы әзірленген Hellen 121 әзірлеу тақтасы. Қазіргі заманғы қозғалтқыш басқару жүйелерін қолдайды және жоғары өнімділікті қамтамасыз етеді."
+        },
+        "category": "hellen-boards",
+        "price_type": "fixed"
     }
 ]

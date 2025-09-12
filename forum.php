@@ -4,7 +4,7 @@ session_start();
 if (isset($_GET['lang'])) {
     setcookie('lang', $_GET['lang'], time() + 3600*24*30, '/');
     $_COOKIE['lang'] = $_GET['lang'];
-    header('Location: index.php');
+    header('Location: forum.php');
     exit;
 }
 $lang = $_COOKIE['lang'] ?? 'ru';
@@ -13,7 +13,7 @@ $lang = $_COOKIE['lang'] ?? 'ru';
 if (isset($_GET['currency'])) {
     setcookie('currency', $_GET['currency'], time() + 3600*24*30, '/');
     $_COOKIE['currency'] = $_GET['currency'];
-    header('Location: index.php');
+    header('Location: forum.php');
     exit;
 }
 $currency = $_COOKIE['currency'] ?? 'KZT';
@@ -98,6 +98,7 @@ function formatPrice($price, $currency) {
     $symbols = ['KZT' => 'KZT', 'RUB' => '₽', 'USD' => '$'];
     return number_format($price, 0, '.', ' ') . ' ' . $symbols[$currency];
 }
+
 $texts = [
     'ru' => [
         'shop' => 'Магазин',
@@ -112,6 +113,25 @@ $texts = [
         'shop_nav' => 'Магазин',
         'contact_nav' => 'Контакты',
         'forum_nav' => 'Форум',
+        'forum_title' => 'Форум rusEFI',
+        'create_topic' => 'Создать тему',
+        'login' => 'Войти',
+        'register' => 'Регистрация',
+        'logout' => 'Выйти',
+        'welcome' => 'Добро пожаловать',
+        'topics' => 'Темы',
+        'posts' => 'Сообщений',
+        'last_post' => 'Последнее сообщение',
+        'author' => 'Автор',
+        'replies' => 'Ответов',
+        'views' => 'Просмотров',
+        'no_topics' => 'Темы не найдены',
+        'search' => 'Поиск',
+        'categories' => 'Категории',
+        'general_discussion' => 'Общее обсуждение',
+        'technical_support' => 'Техническая поддержка',
+        'showcase' => 'Показать',
+        'off_topic' => 'Офф-топик',
     ],
     'kz' => [
         'shop' => 'Дүкен',
@@ -126,6 +146,25 @@ $texts = [
         'shop_nav' => 'Дүкен',
         'contact_nav' => 'Байланыс',
         'forum_nav' => 'Форум',
+        'forum_title' => 'rusEFI Форумы',
+        'create_topic' => 'Тақырып жасау',
+        'login' => 'Кіру',
+        'register' => 'Тіркелу',
+        'logout' => 'Шығу',
+        'welcome' => 'Қош келдіңіз',
+        'topics' => 'Тақырыптар',
+        'posts' => 'Хабарламалар',
+        'last_post' => 'Соңғы хабарлама',
+        'author' => 'Автор',
+        'replies' => 'Жауаптар',
+        'views' => 'Көрулер',
+        'no_topics' => 'Тақырыптар табылмады',
+        'search' => 'Іздеу',
+        'categories' => 'Санаттар',
+        'general_discussion' => 'Жалпы талқылау',
+        'technical_support' => 'Техникалық қолдау',
+        'showcase' => 'Көрсету',
+        'off_topic' => 'Офф-топик',
     ],
     'en' => [
         'shop' => 'Shop',
@@ -140,37 +179,72 @@ $texts = [
         'shop_nav' => 'Shop',
         'contact_nav' => 'Contact',
         'forum_nav' => 'Forum',
+        'forum_title' => 'rusEFI Forum',
+        'create_topic' => 'Create Topic',
+        'login' => 'Login',
+        'register' => 'Register',
+        'logout' => 'Logout',
+        'welcome' => 'Welcome',
+        'topics' => 'Topics',
+        'posts' => 'Posts',
+        'last_post' => 'Last Post',
+        'author' => 'Author',
+        'replies' => 'Replies',
+        'views' => 'Views',
+        'no_topics' => 'No topics found',
+        'search' => 'Search',
+        'categories' => 'Categories',
+        'general_discussion' => 'General Discussion',
+        'technical_support' => 'Technical Support',
+        'showcase' => 'Showcase',
+        'off_topic' => 'Off Topic',
     ]
 ];
-$products = [];
-$products_file = __DIR__ . '/products.json';
-if (file_exists($products_file)) {
-    $products_arr = json_decode(file_get_contents($products_file), true);
-    foreach ($products_arr as &$item) {
-        if (!is_array($item['name'])) $item['name'] = ['ru'=>$item['name'], 'kz'=>''];
-        if (!is_array($item['description'])) $item['description'] = ['ru'=>$item['description'], 'kz'=>''];
-    }
-    unset($item);
-    foreach ($products_arr as $item) {
-        $products[$item['id']] = $item;
-    }
+
+// Загрузка тем форума
+$topics_file = __DIR__ . '/forum_topics.json';
+$topics = [];
+if (file_exists($topics_file)) {
+    $topics = json_decode(file_get_contents($topics_file), true) ?: [];
 }
+
+// Загрузка пользователей
+$users_file = __DIR__ . '/forum_users.json';
+$users = [];
+if (file_exists($users_file)) {
+    $users = json_decode(file_get_contents($users_file), true) ?: [];
+}
+
+// Проверка авторизации
+$user = null;
+if (isset($_SESSION['user_id'])) {
+    $user = $users[$_SESSION['user_id']] ?? null;
+}
+
+// Категории форума
+$categories = [
+    'general' => $texts[$lang]['general_discussion'],
+    'technical' => $texts[$lang]['technical_support'],
+    'showcase' => $texts[$lang]['showcase'],
+    'offtopic' => $texts[$lang]['off_topic']
+];
 ?>
 <!DOCTYPE html>
 <html lang="<?= $lang ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>rusEFI — Магазин</title>
+    <title>rusEFI — <?= $texts[$lang]['forum_title'] ?></title>
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
     <style>
         :root {
             --header-bg: #ff6600;
-            --main-bg: #2a2a2a;
-            --text-white: #ffffff;
+            --main-bg: #f8f9fa;
+            --text-white: #212529;
             --text-orange: #ff6600;
             --text-black: #000000;
-            --border-color: #444444;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
         }
         body {
             background: var(--main-bg);
@@ -308,10 +382,10 @@ if (file_exists($products_file)) {
             align-items: center;
             gap: 10px;
         }
-        .currency-switcher {
+        .currency-switcher, .lang-switcher {
             position: relative;
         }
-        .currency-switcher select {
+        .currency-switcher select, .lang-switcher select {
             background: var(--text-black);
             color: var(--text-white);
             border: 2px solid var(--text-black);
@@ -329,92 +403,22 @@ if (file_exists($products_file)) {
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .currency-switcher select:hover {
+        .currency-switcher select:hover, .lang-switcher select:hover {
             background-color: #333;
             border-color: var(--text-orange);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        .currency-switcher select:focus {
+        .currency-switcher select:focus, .lang-switcher select:focus {
             outline: none;
             border-color: var(--text-orange);
             box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
         }
-        .currency-switcher select option {
+        .currency-switcher select option, .lang-switcher select option {
             background: var(--text-black);
             color: var(--text-white);
             padding: 8px;
         }
-        .lang-switcher {
-            position: relative;
-        }
-        .lang-switcher select {
-            background: var(--text-black);
-            color: var(--text-white);
-            border: 2px solid var(--text-black);
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 12px;
-            padding-right: 32px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .lang-switcher select:hover {
-            background-color: #333;
-            border-color: var(--text-orange);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .lang-switcher select:focus {
-            outline: none;
-            border-color: var(--text-orange);
-            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
-        }
-        .lang-switcher select option {
-            background: var(--text-black);
-            color: var(--text-white);
-            padding: 8px;
-        }
-        .category-nav {
-            padding: 15px 36px;
-            text-align: center;
-        }
-        .category-nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .category-nav li {
-            display: inline;
-        }
-        .category-nav a {
-            color: var(--text-orange);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-        .category-nav a.active {
-            color: var(--text-white);
-        }
-        .category-nav .separator {
-            color: var(--text-white);
-            font-weight: 300;
-            margin: 0 10px;
-        }
-
         .rusefi-main {
             max-width: 1200px;
             margin: 0 auto;
@@ -427,111 +431,143 @@ if (file_exists($products_file)) {
             margin-bottom: 30px;
             color: var(--text-white);
         }
-        .rusefi-products {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            justify-items: center;
-        }
-        .rusefi-card {
-            width: 100%;
-            max-width: 320px;
+        .forum-header {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            overflow: hidden;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
-        .rusefi-card-img {
-            width: 100%;
-            height: 240px;
-            object-fit: cover;
-            background: var(--main-bg);
-            display: block;
-        }
-        .rusefi-card-body {
-            padding: 15px 0;
-            width: 100%;
+        .forum-actions {
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            gap: 15px;
+            align-items: center;
         }
-        .rusefi-card-title {
-            font-size: 1rem;
-            font-weight: bold;
-            color: var(--text-orange);
-            margin: 0;
-            line-height: 1.3;
-        }
-        .rusefi-card-price {
-            color: var(--text-white);
-            font-size: 0.9rem;
-            font-weight: normal;
-            margin: 0;
-        }
-        .rusefi-card-desc {
-            color: var(--text-white);
-            font-size: 0.85rem;
-            margin: 0;
-            line-height: 1.4;
-        }
-        .rusefi-card-btn {
+        .btn {
             background: var(--text-orange);
             color: var(--text-black);
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #e55a00;
+        }
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-white);
+            border: 2px solid var(--text-orange);
+        }
+        .btn-secondary:hover {
+            background: var(--text-orange);
+            color: var(--text-black);
+        }
+        .forum-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .forum-table th,
+        .forum-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .forum-table th {
+            background: var(--header-bg);
+            color: var(--text-black);
             font-weight: 600;
             font-size: 0.9rem;
-            padding: 10px 20px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 12px;
-            width: 100%;
+        }
+        .forum-table td {
+            color: var(--text-white);
+        }
+        .topic-title {
+            font-weight: 600;
+            color: var(--text-orange);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .topic-title:hover {
+            text-decoration: underline;
+        }
+        .topic-meta {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+        .topic-stats {
             text-align: center;
+            font-weight: bold;
         }
-        .rusefi-card-btn:hover {
-            background: #e55a00;
+        .last-post {
+            font-size: 0.85rem;
+            color: #ccc;
         }
-        .quantity-controls {
+        .user-info {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 12px;
+            gap: 10px;
         }
-        .quantity-btn {
-            background: var(--text-orange);
-            color: var(--text-black);
-            border: none;
-            border-radius: 50%;
+        .user-avatar {
             width: 32px;
             height: 32px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
+            border-radius: 50%;
+            background: var(--text-orange);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
-        }
-        .quantity-btn:hover {
-            background: #e55a00;
-        }
-        .quantity-display {
-            min-width: 40px;
-            text-align: center;
+            color: var(--text-black);
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.9rem;
+        }
+        .user-name {
+            font-weight: 500;
+            color: var(--text-orange);
+        }
+        .no-topics {
+            text-align: center;
+            padding: 50px;
+            color: #ccc;
+            font-size: 1.1rem;
+        }
+        .categories {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .category-btn {
+            background: var(--card-bg);
             color: var(--text-white);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .category-btn:hover,
+        .category-btn.active {
+            border-color: var(--text-orange);
+            background: var(--text-orange);
+            color: var(--text-black);
         }
         /* Tablet styles */
         @media (max-width: 1024px) {
             .rusefi-main { padding: 32px 24px; }
-            .rusefi-products { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+            .forum-table th,
+            .forum-table td { padding: 12px; }
         }
-
         @media (max-width: 768px) {
             .rusefi-header { padding: 16px 20px; }
-            .rusefi-logo { font-size: 1.8rem; }
             .main-nav { display: none; }
             .burger-menu { display: flex; }
             .header-right { gap: 15px; }
@@ -541,18 +577,15 @@ if (file_exists($products_file)) {
                 padding: 6px 12px;
                 font-size: 0.8rem;
             }
-            .category-nav { padding: 10px 20px; }
-            .category-nav ul { gap: 16px; flex-wrap: wrap; justify-content: center; }
             .rusefi-main { padding: 32px 20px; }
             .rusefi-title { font-size: 2.2rem; margin-bottom: 32px; }
-            .rusefi-products { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-            .rusefi-card { max-width: 280px; }
-            .rusefi-card-img { height: 180px; }
-            .rusefi-card-title { font-size: 0.95rem; }
-            .rusefi-card-price { font-size: 0.85rem; }
+            .forum-header { flex-direction: column; align-items: stretch; }
+            .forum-actions { justify-content: center; }
+            .forum-table { font-size: 0.9rem; }
+            .forum-table th,
+            .forum-table td { padding: 10px; }
+            .categories { justify-content: center; }
         }
-
-        /* Mobile styles */
         @media (max-width: 480px) {
             .rusefi-header { padding: 12px 16px; }
             .rusefi-logo { font-size: 1.5rem; }
@@ -565,42 +598,13 @@ if (file_exists($products_file)) {
                 padding: 5px 10px;
                 font-size: 0.75rem;
             }
-            .category-nav { padding: 8px 16px; }
-            .category-nav ul { gap: 12px; }
-            .category-nav a { font-size: 0.85rem; }
             .rusefi-main { padding: 24px 16px; }
             .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
-            .rusefi-products { grid-template-columns: 1fr; gap: 20px; }
-            .rusefi-card { max-width: 100%; }
-            .rusefi-card-img { height: 160px; }
-            .rusefi-card-body { padding: 16px; }
-            .rusefi-card-title { font-size: 0.9rem; line-height: 1.2; }
-            .rusefi-card-price { font-size: 0.8rem; }
-            .quantity-controls { gap: 8px; }
-            .quantity-btn { width: 32px; height: 32px; font-size: 1.2rem; }
-        }
-
-        /* Small mobile styles */
-        @media (max-width: 360px) {
-            .rusefi-header { padding: 10px 12px; }
-            .rusefi-logo { font-size: 1.3rem; }
-            .main-nav { gap: 10px; }
-            .nav-link { font-size: 0.8rem; }
-            .header-right { gap: 8px; }
-            .currency-switcher select,
-            .lang-switcher select {
-                padding: 5px 10px;
-                font-size: 0.75rem;
-            }
-            .category-nav { padding: 6px 12px; }
-            .category-nav ul { gap: 8px; }
-            .category-nav a { font-size: 0.8rem; }
-            .rusefi-main { padding: 20px 12px; }
-            .rusefi-title { font-size: 1.6rem; margin-bottom: 20px; }
-            .rusefi-card-img { height: 140px; }
-            .rusefi-card-body { padding: 12px; }
-            .rusefi-card-title { font-size: 0.85rem; }
-            .rusefi-card-price { font-size: 0.75rem; }
+            .forum-table { font-size: 0.8rem; }
+            .forum-table th,
+            .forum-table td { padding: 8px; }
+            .forum-actions { flex-direction: column; gap: 10px; }
+            .categories { flex-direction: column; align-items: center; }
         }
     </style>
 </head>
@@ -611,9 +615,9 @@ if (file_exists($products_file)) {
                 <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
             </div>
             <nav class="main-nav">
-                <a href="index.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>"><?= $texts[$lang]['shop_nav'] ?></a>
-                <a href="#" class="nav-link"><?= $texts[$lang]['contact_nav'] ?></a>
-                <a href="forum.php" class="nav-link"><?= $texts[$lang]['forum_nav'] ?></a>
+                <a href="index.php" class="nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
+                <a href="#" class="nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="forum.php" class="nav-link active"> <?= $texts[$lang]['forum_nav'] ?></a>
             </nav>
             <div class="header-right">
                 <div class="currency-switcher">
@@ -653,28 +657,106 @@ if (file_exists($products_file)) {
         </div>
         <div class="mobile-menu" id="mobile-menu">
             <nav class="mobile-nav">
-                <a href="index.php" class="mobile-nav-link <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>"><?= $texts[$lang]['shop_nav'] ?></a>
-                <a href="#" class="mobile-nav-link" onclick="document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'}); toggleMobileMenu();"><?= $texts[$lang]['contact_nav'] ?></a>
-                <a href="forum.php" class="mobile-nav-link"><?= $texts[$lang]['forum_nav'] ?></a>
+                <a href="index.php" class="mobile-nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
+                <a href="#" class="mobile-nav-link" onclick="document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'}); toggleMobileMenu();"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="forum.php" class="mobile-nav-link active"> <?= $texts[$lang]['forum_nav'] ?></a>
             </nav>
         </div>
     </header>
 
-    <nav class="category-nav">
-        <ul>
-            <li><a href="#" class="category-link active" data-category="all"><?= $texts[$lang]['all'] ?></a></li>
-            <li><span class="separator">|</span></li>
-            <li><a href="#" class="category-link" data-category="hellen-boards"><?= $texts[$lang]['hellen_boards'] ?></a></li>
-            <li><span class="separator">|</span></li>
-            <li><a href="#" class="category-link" data-category="uaefi-boards"><?= $texts[$lang]['uaefi_boards'] ?></a></li>
-        </ul>
-    </nav>
-
     <main class="rusefi-main">
         <h1 class="rusefi-title">
-            <?= $texts[$lang]['shop'] ?>
+            <?= $texts[$lang]['forum_title'] ?>
         </h1>
-        <div class="rusefi-products" id="products-list"></div>
+
+        <div class="forum-header">
+            <div class="user-info">
+                <?php if ($user): ?>
+                    <div class="user-info">
+                        <div class="user-avatar"><?= strtoupper(substr($user['username'], 0, 1)) ?></div>
+                        <span class="user-name"><?= htmlspecialchars($user['username']) ?></span>
+                        <a href="logout.php" class="btn btn-secondary"><?= $texts[$lang]['logout'] ?></a>
+                    </div>
+                <?php else: ?>
+                    <a href="login.php" class="btn btn-secondary"><?= $texts[$lang]['login'] ?></a>
+                    <a href="register.php" class="btn btn-secondary"><?= $texts[$lang]['register'] ?></a>
+                <?php endif; ?>
+            </div>
+            <div class="forum-actions">
+                <?php if ($user): ?>
+                    <a href="create_topic.php" class="btn"><?= $texts[$lang]['create_topic'] ?></a>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="categories">
+            <button class="category-btn active" data-category="all">Все</button>
+            <?php foreach ($categories as $key => $name): ?>
+                <button class="category-btn" data-category="<?= $key ?>"><?= $name ?></button>
+            <?php endforeach; ?>
+        </div>
+
+        <table class="forum-table">
+            <thead>
+                <tr>
+                    <th>Тема</th>
+                    <th>Автор</th>
+                    <th>Ответов</th>
+                    <th>Просмотров</th>
+                    <th>Последнее сообщение</th>
+                </tr>
+            </thead>
+            <tbody id="topics-list">
+                <?php if (empty($topics)): ?>
+                    <tr>
+                        <td colspan="5" class="no-topics">
+                            <?= $texts[$lang]['no_topics'] ?>
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach (array_reverse($topics) as $topic_id => $topic): ?>
+                        <tr>
+                            <td>
+                                <a href="topic.php?id=<?= $topic_id ?>" class="topic-title">
+                                    <?= htmlspecialchars($topic['title']) ?>
+                                </a>
+                                <div class="topic-meta">
+                                    Категория: <?= $categories[$topic['category']] ?? $topic['category'] ?>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <?= strtoupper(substr($users[$topic['author_id']]['username'] ?? 'U', 0, 1)) ?>
+                                    </div>
+                                    <a href="profile.php?id=<?= $topic['author_id'] ?>" class="user-name">
+                                        <?= htmlspecialchars($users[$topic['author_id']]['username'] ?? 'Unknown') ?>
+                                    </a>
+                                </div>
+                            </td>
+                            <td class="topic-stats">
+                                <?= count($topic['posts'] ?? []) - 1 ?>
+                            </td>
+                            <td class="topic-stats">
+                                <?= $topic['views'] ?? 0 ?>
+                            </td>
+                            <td class="last-post">
+                                <?php
+                                $last_post = end($topic['posts'] ?? []);
+                                if ($last_post) {
+                                    $post_time = date('d.m.Y H:i', $last_post['created_at']);
+                                    $post_author = $users[$last_post['author_id']]['username'] ?? 'Unknown';
+                                    echo "$post_time<br>от $post_author";
+                                } else {
+                                    echo 'Нет сообщений';
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </main>
 
     <footer id="footer-contacts" style="background:#232629;color:#bbb;text-align:center;padding:24px 0 12px 0;font-size:1rem;border-top:1px solid #333;">
@@ -683,20 +765,14 @@ if (file_exists($products_file)) {
         </div>
         &copy; <?php echo date('Y'); ?> rusEFI — <a href="https://www.shop.rusefi.com" style="color:#e0e0e0;">rusefi.com</a>
     </footer>
+
     <script>
     const lang = "<?= $lang ?>";
     const currency = "<?= $currency ?>";
     const exchangeRates = <?php echo json_encode($exchange_rates); ?>;
-    const texts = {
-        ru: { add_to_cart: "В корзину" },
-        kz: { add_to_cart: "Себетке" },
-        en: { add_to_cart: "Add to Cart" }
-    };
-    const products = <?php echo json_encode(array_values($products), JSON_UNESCAPED_UNICODE); ?>;
 
     function getCart() {
         const cart = JSON.parse(localStorage.getItem('cart') || '{}');
-        // Convert old format
         for (let id in cart) {
             if (typeof cart[id] === 'number') {
                 cart[id] = {quantity: cart[id], price: 0, name: ''};
@@ -712,126 +788,13 @@ if (file_exists($products_file)) {
         document.getElementById('cart-count').textContent = count;
     }
 
-    function convertPrice(priceUSD, targetCurrency) {
-        if (targetCurrency === 'USD') return priceUSD;
-        return Math.round(priceUSD * exchangeRates[targetCurrency] * 100) / 100;
-    }
-
-    function formatPrice(price, currency) {
-        const symbols = { 'KZT': 'KZT', 'RUB': '₽', 'USD': '$' };
-        return new Intl.NumberFormat('ru-RU').format(price) + ' ' + symbols[currency];
-    }
-
-    let currentCategory = 'all';
-
-    function renderProducts(category = 'all') {
-        let html = '';
-        const cart = getCart();
-
-        products.forEach(p => {
-            // Фильтрация по категории
-            if (category !== 'all' && p.category !== category) return;
-
-            // Мультиязычность для name
-            let name = typeof p.name === 'object' ? (p.name[lang] || p.name['ru'] || '') : p.name;
-            const convertedPrice = convertPrice(p.price, currency);
-            const formattedPrice = formatPrice(convertedPrice, currency);
-            let priceText = formattedPrice;
-            if (p.id === 'ultra-affordable-efi-121' || p.id === 'uaefi-ultra-affordable') {
-                if (lang === 'ru') priceText = 'от ' + formattedPrice;
-                else if (lang === 'kz') priceText = formattedPrice + ' бастап';
-                else priceText = 'from ' + formattedPrice;
-            }
-            // Get first image from gallery
-            const firstImage = Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : (p.img || '');
-            html += `<div class='rusefi-card' data-id='${p.id}'>
-                <img src='${firstImage}' alt='${name}' class='rusefi-card-img'>
-                <div class='rusefi-card-body'>
-                    <h3 class='rusefi-card-title'>${name}</h3>
-                    <p class='rusefi-card-price'>${priceText}</p>
-                </div>
-            </div>`;
-        });
-        document.getElementById('products-list').innerHTML = html;
-
-        // Обработчик для кнопок "В корзину" - предотвращаем открытие модалки
-        document.querySelectorAll('.rusefi-card-btn').forEach(btn => {
-            btn.onclick = function(e) {
-                e.stopPropagation(); // Предотвращаем всплытие события
-                const id = this.getAttribute('data-id');
-                const cart = getCart();
-                const p = products.find(prod => prod.id == id);
-                cart[id] = {quantity: (cart[id]?.quantity || 0) + 1, price: p.price, name: p.name[lang]};
-                setCart(cart);
-                updateCartUI();
-                renderProducts(); // Перерисовываем продукты чтобы показать quantity controls
-            };
-        });
-
-        // Обработчик для кнопок quantity controls
-        document.querySelectorAll('.quantity-btn').forEach(btn => {
-            btn.onclick = function(e) {
-                e.stopPropagation();
-                const id = this.getAttribute('data-id');
-                const action = this.getAttribute('data-action');
-                const cart = getCart();
-
-                if (action === 'increase') {
-                    const p = products.find(prod => prod.id == id);
-                    cart[id] = {quantity: (cart[id]?.quantity || 0) + 1, price: p.price, name: p.name[lang]};
-                } else if (action === 'decrease') {
-                    cart[id].quantity = (cart[id]?.quantity || 0) - 1;
-                    if (cart[id].quantity <= 0) {
-                        delete cart[id];
-                    }
-                }
-
-                setCart(cart);
-                updateCartUI();
-                renderProducts(); // Перерисовываем продукты
-            };
-        });
-
-        // Обработчик для перехода на страницу товара при клике на карточку (кроме кнопок)
-        document.querySelectorAll('.rusefi-card').forEach(card => {
-            card.onclick = function(e) {
-                // Если клик был на кнопке или quantity controls, не переходим
-                if (e.target.classList.contains('rusefi-card-btn') ||
-                    e.target.classList.contains('quantity-btn') ||
-                    e.target.classList.contains('quantity-display')) return;
-
-                const id = this.getAttribute('data-id');
-                window.location.href = 'product.php?id=' + id;
-            };
-        });
-    }
-
-
-
     function toggleMobileMenu() {
         const menu = document.getElementById('mobile-menu');
         menu.classList.toggle('open');
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        renderProducts();
         updateCartUI();
-
-        // Обработчик для фильтрации по категориям
-        document.querySelectorAll('.category-link').forEach(link => {
-            link.onclick = function(e) {
-                e.preventDefault();
-                const category = this.getAttribute('data-category');
-
-                // Обновляем активную категорию
-                document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-
-                // Фильтруем продукты
-                currentCategory = category;
-                renderProducts(category);
-            };
-        });
 
         // Обработчик для контактов
         var contacts = document.querySelector('.main-nav a[href="#"]');
@@ -842,6 +805,24 @@ if (file_exists($products_file)) {
             };
         }
 
+        // Фильтрация по категориям
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.onclick = function() {
+                const category = this.getAttribute('data-category');
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const rows = document.querySelectorAll('#topics-list tr');
+                rows.forEach(row => {
+                    if (category === 'all') {
+                        row.style.display = '';
+                    } else {
+                        const topicCategory = row.querySelector('.topic-meta').textContent.includes(category) ? category : 'other';
+                        row.style.display = topicCategory === category ? '' : 'none';
+                    }
+                });
+            };
+        });
     });
 
     window.addEventListener('storage', function() { updateCartUI(); });
