@@ -201,13 +201,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($user_id) {
-            // Авторизация успешна
-            $_SESSION['user_id'] = $user_id;
-            $users[$user_id]['last_login'] = time();
-            file_put_contents($users_file, json_encode($users, JSON_UNESCAPED_UNICODE));
+            // Проверка на бан
+            if (isset($users[$user_id]['banned']) && $users[$user_id]['banned']) {
+                $message = 'Ваш аккаунт заблокирован. Обратитесь к администратору.';
+            } else {
+                // Авторизация успешна
+                $_SESSION['user_id'] = $user_id;
+                $users[$user_id]['last_login'] = time();
+                file_put_contents($users_file, json_encode($users, JSON_UNESCAPED_UNICODE));
 
-            header('Location: forum.php');
-            exit;
+                header('Location: forum.php');
+                exit;
+            }
         } else {
             $message = $texts[$lang]['invalid_credentials'];
         }
@@ -250,6 +255,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: space-between;
             max-width: 1200px;
             margin: 0 auto;
+        }
+        .logo-link {
+            text-decoration: none;
+        }
+        .burger-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+        .burger-line {
+            width: 24px;
+            height: 2px;
+            background: var(--text-black);
+            transition: 0.3s;
+        }
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--header-bg);
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .mobile-menu.open {
+            display: block;
+        }
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .mobile-nav-link {
+            color: var(--text-black);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .mobile-nav-link:hover {
+            color: var(--text-orange);
         }
         .logo {
             font-size: 1.8rem;
@@ -331,7 +380,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .currency-switcher select, .lang-switcher select {
             background: var(--text-black);
-            color: var(--text-white);
+            color: #ffffff;
             border: 2px solid var(--text-black);
             border-radius: 20px;
             padding: 8px 16px;
@@ -464,6 +513,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .rusefi-title { font-size: 2.2rem; margin-bottom: 32px; }
             .form-container { padding: 25px; }
         }
+        @media (max-width: 768px) {
+            .main-nav { display: none; }
+            .burger-menu { display: flex; }
+        }
         @media (max-width: 480px) {
             .rusefi-header { padding: 12px 16px; }
             .rusefi-logo { font-size: 1.5rem; }
@@ -474,6 +527,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .lang-switcher select {
                 padding: 6px 12px;
                 font-size: 0.8rem;
+                background-image: none;
+                padding-right: 12px;
             }
             .rusefi-main { padding: 24px 16px; }
             .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
@@ -484,9 +539,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <header class="rusefi-header">
         <div class="header-content">
-            <div class="logo">
-                <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
-            </div>
+            <a href="index.php" class="logo-link">
+                <div class="logo">
+                    <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
+                </div>
+            </a>
             <nav class="main-nav">
                 <a href="index.php" class="nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
                 <a href="#" class="nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
@@ -521,7 +578,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span id="cart-count" class="cart-count">0</span>
                     </a>
                 </div>
+                <div class="burger-menu" onclick="toggleMobileMenu()">
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                </div>
             </div>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <nav class="mobile-nav">
+                <a href="index.php" class="mobile-nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
+                <a href="#" class="mobile-nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="forum.php" class="mobile-nav-link active"> <?= $texts[$lang]['forum_nav'] ?></a>
+            </nav>
         </div>
     </header>
 
@@ -589,6 +658,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('cart-count').textContent = count;
     }
 
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        if (menu) {
+            menu.classList.toggle('open');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         updateCartUI();
 
@@ -598,6 +674,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             contacts.onclick = function(e) {
                 e.preventDefault();
                 document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
+            };
+        }
+
+        // Обработчик для мобильного меню контактов
+        var mobileContacts = document.querySelector('.mobile-nav a[href="#"]');
+        if (mobileContacts) {
+            mobileContacts.onclick = function(e) {
+                e.preventDefault();
+                document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
+                toggleMobileMenu();
             };
         }
     });

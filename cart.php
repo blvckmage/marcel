@@ -520,6 +520,8 @@ $texts = [
             .lang-switcher select {
                 padding: 6px 12px;
                 font-size: 0.8rem;
+                background-image: none;
+                padding-right: 12px;
             }
             .rusefi-main { padding: 32px 20px; }
             .rusefi-title { font-size: 2.2rem; margin-bottom: 32px; }
@@ -546,6 +548,8 @@ $texts = [
             .lang-switcher select {
                 padding: 5px 10px;
                 font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
             }
             .rusefi-main { padding: 24px 16px; }
             .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
@@ -608,6 +612,8 @@ $texts = [
             .lang-switcher select {
                 padding: 5px 10px;
                 font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
             }
             .rusefi-main { padding: 20px 12px; }
             .rusefi-title { font-size: 1.6rem; margin-bottom: 20px; }

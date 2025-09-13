@@ -207,6 +207,12 @@ if (file_exists($users_file)) {
 $user = null;
 if (isset($_SESSION['user_id'])) {
     $user = $users[$_SESSION['user_id']] ?? null;
+    // Проверка на бан
+    if ($user && isset($user['banned']) && $user['banned']) {
+        session_destroy();
+        header('Location: login.php');
+        exit;
+    }
 }
 
 // Получаем тему по ID
@@ -343,6 +349,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
             max-width: 1200px;
             margin: 0 auto;
         }
+        .logo-link {
+            text-decoration: none;
+        }
+        .burger-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+        .burger-line {
+            width: 24px;
+            height: 2px;
+            background: var(--text-black);
+            transition: 0.3s;
+        }
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--header-bg);
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .mobile-menu.open {
+            display: block;
+        }
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .mobile-nav-link {
+            color: var(--text-black);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .mobile-nav-link:hover {
+            color: var(--text-orange);
+        }
         .logo {
             font-size: 1.8rem;
             font-weight: bold;
@@ -418,10 +468,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
             align-items: center;
             gap: 10px;
         }
-        .currency-switcher, .lang-switcher {
+        .currency-switcher {
             position: relative;
         }
-        .currency-switcher select, .lang-switcher select {
+        .currency-switcher select {
+            background: var(--text-black);
+            color: #ffffff;
+            border: 2px solid var(--text-black);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+            padding-right: 32px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .currency-switcher select:hover {
+            background-color: #333;
+            border-color: var(--text-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .currency-switcher select:focus {
+            outline: none;
+            border-color: var(--text-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+        }
+        .currency-switcher select option {
+            background: var(--text-black);
+            color: var(--text-white);
+            padding: 8px;
+        }
+        .lang-switcher {
+            position: relative;
+        }
+        .lang-switcher select {
             background: var(--text-black);
             color: var(--text-white);
             border: 2px solid var(--text-black);
@@ -439,18 +526,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .currency-switcher select:hover, .lang-switcher select:hover {
+        .lang-switcher select:hover {
             background-color: #333;
             border-color: var(--text-orange);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        .currency-switcher select:focus, .lang-switcher select:focus {
+        .lang-switcher select:focus {
             outline: none;
             border-color: var(--text-orange);
             box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
         }
-        .currency-switcher select option, .lang-switcher select option {
+        .lang-switcher select option {
             background: var(--text-black);
             color: var(--text-white);
             padding: 8px;
@@ -627,8 +714,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
         }
         @media (max-width: 768px) {
             .rusefi-header { padding: 16px 20px; }
-            .main-nav { gap: 20px; }
+            .main-nav { display: none; }
+            .burger-menu { display: flex; }
             .header-right { gap: 15px; }
+            .cart-icon { width: 20px; height: 20px; }
+            .currency-switcher select,
+            .lang-switcher select {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                background-image: none;
+                padding-right: 12px;
+            }
             .rusefi-main { padding: 32px 20px; }
             .rusefi-title { font-size: 2.2rem; margin-bottom: 32px; }
             .topic-title { font-size: 1.5rem; }
@@ -637,13 +733,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
         @media (max-width: 480px) {
             .rusefi-header { padding: 12px 16px; }
             .rusefi-logo { font-size: 1.5rem; }
-            .main-nav { gap: 15px; }
+            .main-nav { display: none; }
             .nav-link { font-size: 0.9rem; }
             .header-right { gap: 10px; }
+            .cart-icon { width: 18px; height: 18px; }
             .currency-switcher select,
             .lang-switcher select {
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                padding: 5px 10px;
+                font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
             }
             .rusefi-main { padding: 24px 16px; }
             .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
@@ -658,18 +757,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
 <body>
     <header class="rusefi-header">
         <div class="header-content">
-            <div class="logo">
-                <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
-            </div>
+            <a href="index.php" class="logo-link">
+                <div class="logo">
+                    <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
+                </div>
+            </a>
             <nav class="main-nav">
                 <a href="index.php" class="nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
-                <a href="#" class="nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="index.php#footer-contacts" class="nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
                 <a href="forum.php" class="nav-link active"> <?= $texts[$lang]['forum_nav'] ?></a>
             </nav>
             <div class="header-right">
                 <div class="currency-switcher">
                     <form method="get" style="margin:0;padding:0;display:inline;">
-                        <input type="hidden" name="id" value="<?= htmlspecialchars($topic_id) ?>">
                         <select name="currency" onchange="this.form.submit()">
                             <option value="KZT" <?= $currency == 'KZT' ? 'selected' : '' ?>>KZT</option>
                             <option value="RUB" <?= $currency == 'RUB' ? 'selected' : '' ?>>RUB</option>
@@ -679,7 +779,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
                 </div>
                 <div class="lang-switcher">
                     <form method="get" style="margin:0;padding:0;display:inline;">
-                        <input type="hidden" name="id" value="<?= htmlspecialchars($topic_id) ?>">
                         <select name="lang" onchange="this.form.submit()">
                             <option value="ru" <?= $lang == 'ru' ? 'selected' : '' ?>>RU</option>
                             <option value="kz" <?= $lang == 'kz' ? 'selected' : '' ?>>KZ</option>
@@ -697,7 +796,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
                         <span id="cart-count" class="cart-count">0</span>
                     </a>
                 </div>
+                <div class="burger-menu" onclick="toggleMobileMenu()">
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                </div>
             </div>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <nav class="mobile-nav">
+                <a href="index.php" class="mobile-nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
+                <a href="index.php#footer-contacts" class="mobile-nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="forum.php" class="mobile-nav-link active"> <?= $texts[$lang]['forum_nav'] ?></a>
+            </nav>
         </div>
     </header>
 
@@ -745,6 +856,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
                                 <?php foreach ($post['images'] as $image): ?>
                                     <img src="<?= htmlspecialchars($image) ?>" alt="Изображение" style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 10px; display: block;">
                                 <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($user && isset($user['role']) && $user['role'] === 'admin'): ?>
+                            <div class="admin-post-actions" style="margin-top: 10px; text-align: right;">
+                                <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 8px;" onclick="deletePost('<?= $topic_id ?>', '<?= $index ?>')">Удалить сообщение</button>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -872,6 +988,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
     document.addEventListener('DOMContentLoaded', function() {
         updateCartUI();
 
+        // Обработчик для бургер меню
+        const burgerMenu = document.querySelector('.burger-menu');
+        console.log('burgerMenu found:', burgerMenu);
+        if (burgerMenu) {
+            console.log('Adding event listeners to burgerMenu');
+            burgerMenu.addEventListener('click', function() {
+                console.log('Burger menu clicked');
+                window.toggleMobileMenu();
+            });
+            burgerMenu.addEventListener('touchstart', function() {
+                console.log('Burger menu touched');
+                window.toggleMobileMenu();
+            });
+        } else {
+            console.log('burgerMenu not found');
+        }
+
         // Обработчик для контактов
         var contacts = document.querySelector('.main-nav a[href="#"]');
         if (contacts) {
@@ -881,6 +1014,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_content'])) {
             };
         }
     });
+
+    // Удаление сообщения (для админа)
+    window.deletePost = function(topicId, postIndex) {
+        if (confirm('Вы уверены, что хотите удалить это сообщение?')) {
+            fetch('delete_post.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'topic_id=' + encodeURIComponent(topicId) + '&post_index=' + encodeURIComponent(postIndex)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Ошибка при удалении сообщения: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при удалении сообщения');
+            });
+        }
+    };
 
     window.addEventListener('storage', function() { updateCartUI(); });
     </script>

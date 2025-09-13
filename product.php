@@ -200,6 +200,9 @@ if (!$product) {
             max-width: 1200px;
             margin: 0 auto;
         }
+        .logo-link {
+            text-decoration: none;
+        }
         .burger-menu {
             display: none;
             flex-direction: column;
@@ -573,6 +576,8 @@ if (!$product) {
             .lang-switcher select {
                 padding: 6px 12px;
                 font-size: 0.8rem;
+                background-image: none;
+                padding-right: 12px;
             }
             .rusefi-main { padding: 32px 20px; }
             .product-detail { gap: 25px; }
@@ -605,6 +610,8 @@ if (!$product) {
             .lang-switcher select {
                 padding: 5px 10px;
                 font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
             }
             .rusefi-main { padding: 24px 16px; }
             .product-detail { gap: 20px; }
@@ -640,6 +647,8 @@ if (!$product) {
             .lang-switcher select {
                 padding: 5px 10px;
                 font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
             }
             .rusefi-main { padding: 20px 12px; }
             .product-detail { gap: 18px; }
@@ -687,9 +696,11 @@ if (!$product) {
 <body>
     <header class="rusefi-header">
         <div class="header-content">
-            <div class="logo">
-                <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
-            </div>
+            <a href="index.php" class="logo-link">
+                <div class="logo">
+                    <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
+                </div>
+            </a>
             <nav class="main-nav">
                 <a href="index.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>"><?= $texts[$lang]['shop_nav'] ?></a>
                 <a href="#" class="nav-link"><?= $texts[$lang]['contact_nav'] ?></a>

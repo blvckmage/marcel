@@ -194,13 +194,18 @@ if (file_exists($users_file)) {
 $user = null;
 if (isset($_SESSION['user_id'])) {
     $user = $users[$_SESSION['user_id']] ?? null;
+    // Проверка на бан
+    if ($user && isset($user['banned']) && $user['banned']) {
+        session_destroy();
+        header('Location: login.php');
+        exit;
+    }
 }
 
 // Категории форума
 $categories = [
     'general' => $texts[$lang]['general_discussion'],
     'technical' => $texts[$lang]['technical_support'],
-    'showcase' => $texts[$lang]['showcase'],
     'offtopic' => $texts[$lang]['off_topic']
 ];
 
@@ -701,12 +706,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     function previewImages(input) {
         const preview = document.getElementById('image-preview');
-        preview.innerHTML = '';
 
         if (input.files) {
-            // Store files in a custom property to maintain correct order
-            input._selectedFiles = Array.from(input.files);
+            // If no stored files, initialize with current files
+            if (!input._selectedFiles) {
+                input._selectedFiles = [];
+            }
 
+            // Add new files to existing ones
             Array.from(input.files).forEach((file, index) => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -714,7 +721,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         const container = document.createElement('div');
                         container.className = 'image-preview-item';
                         container.style.cssText = 'display: inline-block; position: relative; margin: 5px; border: 2px solid #ddd; border-radius: 8px; overflow: hidden;';
-                        container.dataset.index = index;
+                        container.dataset.index = input._selectedFiles.length;
 
                         const img = document.createElement('img');
                         img.src = e.target.result;
@@ -737,14 +744,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             remainingContainers.forEach((cont, idx) => {
                                 cont.dataset.index = idx;
                             });
-
-                            // Re-trigger preview to maintain correct order
-                            previewImages(input);
                         };
 
                         container.appendChild(img);
                         container.appendChild(removeBtn);
                         preview.appendChild(container);
+
+                        // Add file to stored array
+                        input._selectedFiles.push(file);
                     };
                     reader.readAsDataURL(file);
                 }

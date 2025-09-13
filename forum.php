@@ -219,13 +219,18 @@ if (file_exists($users_file)) {
 $user = null;
 if (isset($_SESSION['user_id'])) {
     $user = $users[$_SESSION['user_id']] ?? null;
+    // Проверка на бан
+    if ($user && isset($user['banned']) && $user['banned']) {
+        session_destroy();
+        header('Location: login.php');
+        exit;
+    }
 }
 
 // Категории форума
 $categories = [
     'general' => $texts[$lang]['general_discussion'],
     'technical' => $texts[$lang]['technical_support'],
-    'showcase' => $texts[$lang]['showcase'],
     'offtopic' => $texts[$lang]['off_topic']
 ];
 ?>
@@ -236,6 +241,15 @@ $categories = [
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>rusEFI — <?= $texts[$lang]['forum_title'] ?></title>
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+    <script>
+    window.toggleMobileMenu = function() {
+        console.log('toggleMobileMenu called');
+        const menu = document.getElementById('mobile-menu');
+        console.log('menu element:', menu);
+        menu.classList.toggle('open');
+        console.log('menu classList:', menu.classList);
+    }
+    </script>
     <style>
         :root {
             --header-bg: #ff6600;
@@ -265,6 +279,9 @@ $categories = [
             justify-content: space-between;
             max-width: 1200px;
             margin: 0 auto;
+        }
+        .logo-link {
+            text-decoration: none;
         }
         .burger-menu {
             display: none;
@@ -382,12 +399,12 @@ $categories = [
             align-items: center;
             gap: 10px;
         }
-        .currency-switcher, .lang-switcher {
+        .currency-switcher {
             position: relative;
         }
-        .currency-switcher select, .lang-switcher select {
+        .currency-switcher select {
             background: var(--text-black);
-            color: var(--text-white);
+            color: #ffffff;
             border: 2px solid var(--text-black);
             border-radius: 20px;
             padding: 8px 16px;
@@ -403,18 +420,55 @@ $categories = [
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .currency-switcher select:hover, .lang-switcher select:hover {
+        .currency-switcher select:hover {
             background-color: #333;
             border-color: var(--text-orange);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        .currency-switcher select:focus, .lang-switcher select:focus {
+        .currency-switcher select:focus {
             outline: none;
             border-color: var(--text-orange);
             box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
         }
-        .currency-switcher select option, .lang-switcher select option {
+        .currency-switcher select option {
+            background: var(--text-black);
+            color: var(--text-white);
+            padding: 8px;
+        }
+        .lang-switcher {
+            position: relative;
+        }
+        .lang-switcher select {
+            background: var(--text-black);
+            color: #ffffff;
+            border: 2px solid var(--text-black);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+            padding-right: 32px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .lang-switcher select:hover {
+            background-color: #333;
+            border-color: var(--text-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .lang-switcher select:focus {
+            outline: none;
+            border-color: var(--text-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+        }
+        .lang-switcher select option {
             background: var(--text-black);
             color: var(--text-white);
             padding: 8px;
@@ -539,10 +593,33 @@ $categories = [
             color: #ccc;
             font-size: 1.1rem;
         }
+        .forum-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: var(--card-bg);
+            color: var(--text-white);
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--text-orange);
+        }
         .categories {
             display: flex;
             gap: 20px;
-            margin-bottom: 30px;
             flex-wrap: wrap;
         }
         .category-btn {
@@ -576,6 +653,8 @@ $categories = [
             .lang-switcher select {
                 padding: 6px 12px;
                 font-size: 0.8rem;
+                background-image: none;
+                padding-right: 12px;
             }
             .rusefi-main { padding: 32px 20px; }
             .rusefi-title { font-size: 2.2rem; margin-bottom: 32px; }
@@ -597,26 +676,61 @@ $categories = [
             .lang-switcher select {
                 padding: 5px 10px;
                 font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
             }
             .rusefi-main { padding: 24px 16px; }
             .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
             .forum-table { font-size: 0.8rem; }
             .forum-table th,
             .forum-table td { padding: 8px; }
+            .forum-table th:nth-child(3),
+            .forum-table th:nth-child(4),
+            .forum-table td:nth-child(3),
+            .forum-table td:nth-child(4) { display: none; }
             .forum-actions { flex-direction: column; gap: 10px; }
             .categories { flex-direction: column; align-items: center; }
+        }
+
+        /* Small mobile styles */
+        @media (max-width: 360px) {
+            .rusefi-header { padding: 10px 12px; }
+            .rusefi-logo { font-size: 1.3rem; }
+            .main-nav { gap: 10px; }
+            .nav-link { font-size: 0.8rem; }
+            .header-right { gap: 8px; }
+            .currency-switcher select,
+            .lang-switcher select {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
+            }
+            .rusefi-main { padding: 20px 12px; }
+            .rusefi-title { font-size: 1.6rem; margin-bottom: 20px; }
+            .forum-table { font-size: 0.75rem; }
+            .forum-table th,
+            .forum-table td { padding: 6px; }
+            .forum-table th:nth-child(3),
+            .forum-table th:nth-child(4),
+            .forum-table td:nth-child(3),
+            .forum-table td:nth-child(4) { display: none; }
+            .forum-actions { flex-direction: column; gap: 8px; }
+            .categories { flex-direction: column; align-items: center; gap: 10px; }
         }
     </style>
 </head>
 <body>
     <header class="rusefi-header">
         <div class="header-content">
-            <div class="logo">
-                <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
-            </div>
+            <a href="index.php" class="logo-link">
+                <div class="logo">
+                    <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
+                </div>
+            </a>
             <nav class="main-nav">
                 <a href="index.php" class="nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
-                <a href="#" class="nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="index.php#footer-contacts" class="nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
                 <a href="forum.php" class="nav-link active"> <?= $texts[$lang]['forum_nav'] ?></a>
             </nav>
             <div class="header-right">
@@ -638,16 +752,6 @@ $categories = [
                         </select>
                     </form>
                 </div>
-                <div class="cart-section">
-                    <a href="cart.php" class="cart-link">
-                        <svg viewBox="0 0 24 24" class="cart-icon">
-                            <circle cx="9" cy="21" r="1"/>
-                            <circle cx="20" cy="21" r="1"/>
-                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/>
-                        </svg>
-                        <span id="cart-count" class="cart-count">0</span>
-                    </a>
-                </div>
                 <div class="burger-menu" onclick="toggleMobileMenu()">
                     <div class="burger-line"></div>
                     <div class="burger-line"></div>
@@ -658,7 +762,7 @@ $categories = [
         <div class="mobile-menu" id="mobile-menu">
             <nav class="mobile-nav">
                 <a href="index.php" class="mobile-nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
-                <a href="#" class="mobile-nav-link" onclick="document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'}); toggleMobileMenu();"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="index.php#footer-contacts" class="mobile-nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
                 <a href="forum.php" class="mobile-nav-link active"> <?= $texts[$lang]['forum_nav'] ?></a>
             </nav>
         </div>
@@ -675,6 +779,9 @@ $categories = [
                     <div class="user-info">
                         <div class="user-avatar"><?= strtoupper(substr($user['username'], 0, 1)) ?></div>
                         <span class="user-name"><?= htmlspecialchars($user['username']) ?></span>
+                        <?php if (isset($user['role']) && $user['role'] === 'admin'): ?>
+                            <a href="admin_users.php" class="btn btn-secondary" style="margin-right: 10px;">Админ-панель</a>
+                        <?php endif; ?>
                         <a href="logout.php" class="btn btn-secondary"><?= $texts[$lang]['logout'] ?></a>
                     </div>
                 <?php else: ?>
@@ -689,11 +796,18 @@ $categories = [
             </div>
         </div>
 
-        <div class="categories">
-            <button class="category-btn active" data-category="all">Все</button>
-            <?php foreach ($categories as $key => $name): ?>
-                <button class="category-btn" data-category="<?= $key ?>"><?= $name ?></button>
-            <?php endforeach; ?>
+        <div class="forum-filters">
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Поиск по темам..." class="search-input">
+                <button id="search-btn" class="btn">Поиск</button>
+                <button id="reset-btn" class="btn btn-secondary">Сбросить</button>
+            </div>
+            <div class="categories">
+                <button class="category-btn active" data-category="all">Все</button>
+                <?php foreach ($categories as $key => $name): if ($key !== 'showcase'): ?>
+                    <button class="category-btn" data-category="<?= $key ?>"><?= $name ?></button>
+                <?php endif; endforeach; ?>
+            </div>
         </div>
 
         <table class="forum-table">
@@ -723,6 +837,11 @@ $categories = [
                                 <div class="topic-meta">
                                     Категория: <?= $categories[$topic['category']] ?? $topic['category'] ?>
                                 </div>
+                                <?php if ($user && isset($user['role']) && $user['role'] === 'admin'): ?>
+                                    <div class="admin-actions" style="margin-top: 5px;">
+                                        <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 4px 8px;" onclick="deleteTopic('<?= $topic_id ?>')">Удалить тему</button>
+                                    </div>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="user-info">
@@ -742,7 +861,8 @@ $categories = [
                             </td>
                             <td class="last-post">
                                 <?php
-                                $last_post = end($topic['posts'] ?? []);
+                                $posts = $topic['posts'] ?? [];
+                                $last_post = end($posts);
                                 if ($last_post) {
                                     $post_time = date('d.m.Y H:i', $last_post['created_at']);
                                     $post_author = $users[$last_post['author_id']]['username'] ?? 'Unknown';
@@ -780,29 +900,79 @@ $categories = [
         }
         return cart;
     }
+
+    function testCart() {
+        // Добавим тестовый товар в корзину
+        const cart = getCart();
+        cart['test'] = {quantity: 5, price: 100, name: 'Test Item'};
+        setCart(cart);
+        updateCartUI();
+        alert('Test item added to cart');
+    }
     function setCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); }
     function updateCartUI() {
         const cart = getCart();
         let count = 0;
         for (let id in cart) count += cart[id].quantity;
-        document.getElementById('cart-count').textContent = count;
+        const cartCountElement = document.getElementById('cart-count');
+        if (cartCountElement) {
+            cartCountElement.textContent = count;
+        }
     }
 
-    function toggleMobileMenu() {
+    window.toggleMobileMenu = function() {
+        console.log('toggleMobileMenu called');
         const menu = document.getElementById('mobile-menu');
+        console.log('menu element:', menu);
         menu.classList.toggle('open');
+        console.log('menu classList:', menu.classList);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
         updateCartUI();
 
-        // Обработчик для контактов
+        // Обработчик для бургер меню
+        const burgerMenu = document.querySelector('.burger-menu');
+        console.log('burgerMenu element:', burgerMenu);
+        if (burgerMenu) {
+            console.log('Adding event listeners to burgerMenu');
+            burgerMenu.addEventListener('click', toggleMobileMenu);
+            burgerMenu.addEventListener('touchstart', toggleMobileMenu);
+        } else {
+            console.log('burgerMenu not found');
+        }
+
+        // Обработчик для контактов в основной навигации
         var contacts = document.querySelector('.main-nav a[href="#"]');
         if (contacts) {
-            contacts.onclick = function(e) {
+            contacts.addEventListener('click', function(e) {
                 e.preventDefault();
                 document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
-            };
+            });
+        }
+
+        // Обработчик для контактов в мобильной навигации
+        var mobileContacts = document.querySelector('.mobile-nav a[href="#"]');
+        if (mobileContacts) {
+            mobileContacts.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
+                toggleMobileMenu();
+            });
+        }
+
+        // Функция фильтрации тем
+        function filterTopics(searchQuery = '', categoryFilter = 'all') {
+            const rows = document.querySelectorAll('#topics-list tr');
+            rows.forEach(row => {
+                const title = row.querySelector('.topic-title').textContent.toLowerCase();
+                const meta = row.querySelector('.topic-meta').textContent.toLowerCase();
+
+                const matchesSearch = searchQuery === '' || title.includes(searchQuery.toLowerCase());
+                const matchesCategory = categoryFilter === 'all' || meta.includes(categoryFilter.toLowerCase());
+
+                row.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
+            });
         }
 
         // Фильтрация по категориям
@@ -812,20 +982,63 @@ $categories = [
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
-                const rows = document.querySelectorAll('#topics-list tr');
-                rows.forEach(row => {
-                    if (category === 'all') {
-                        row.style.display = '';
-                    } else {
-                        const topicCategory = row.querySelector('.topic-meta').textContent.includes(category) ? category : 'other';
-                        row.style.display = topicCategory === category ? '' : 'none';
-                    }
-                });
+                const searchQuery = document.getElementById('search-input').value;
+                filterTopics(searchQuery, category);
             };
         });
+
+        // Поиск по темам
+        document.getElementById('search-btn').onclick = function() {
+            const searchQuery = document.getElementById('search-input').value;
+            const activeCategory = document.querySelector('.category-btn.active').getAttribute('data-category');
+            filterTopics(searchQuery, activeCategory);
+        };
+
+        // Поиск при нажатии Enter
+        document.getElementById('search-input').onkeypress = function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('search-btn').click();
+            }
+        };
+
+        // Сброс поиска и фильтров
+        document.getElementById('reset-btn').onclick = function() {
+            document.getElementById('search-input').value = '';
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.category-btn[data-category="all"]').classList.add('active');
+            filterTopics('', 'all');
+        };
+
+        // Удаление темы (для админа)
+        window.deleteTopic = function(topicId) {
+            if (confirm('Вы уверены, что хотите удалить эту тему?')) {
+                fetch('delete_topic.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'topic_id=' + encodeURIComponent(topicId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Ошибка при удалении темы: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при удалении темы');
+                });
+            }
+        };
     });
 
     window.addEventListener('storage', function() { updateCartUI(); });
+
+    // Периодическое обновление счетчика корзины
+    setInterval(updateCartUI, 1000);
     </script>
 </body>
 </html>
