@@ -183,6 +183,7 @@ $texts = [
             --text-orange: #ff6600;
             --text-black: #000000;
             --border-color: #444444;
+            --rusefi-orange: #ff7a1a;
         }
         body {
             background: var(--main-bg);
@@ -494,16 +495,23 @@ $texts = [
         .cart-summary .cart-total { color: var(--text-orange); font-weight: 700; margin-left: 8px; }
         .cart-actions { display: flex; gap: 16px; justify-content: flex-end; }
         .cart-order-btn {
-            background: var(--text-orange);
-            color: var(--text-black);
-            border-radius: 6px;
-            font-weight: 600;
+            background: var(--rusefi-orange);
+            color: #181818;
             border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            transition: background 0.2s;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            padding: 14px 24px;
+            margin-top: 8px;
+            width: auto;
+            max-width: 300px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            transition: background 0.18s, color 0.18s;
         }
-        .cart-order-btn:hover { background: #e55a00; }
+        .cart-order-btn:hover { background: #ff9a4d; color: #fff; }
         /* Tablet styles */
         @media (max-width: 1024px) {
             .rusefi-main { padding: 32px 24px; }
@@ -551,7 +559,7 @@ $texts = [
                 background-image: none;
                 padding-right: 10px;
             }
-            .rusefi-main { padding: 24px 16px; }
+            .rusefi-main { padding: 24px 16px 100px 16px; }
             .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
             .cart-list { gap: 20px; }
             .cart-list-card {
@@ -596,8 +604,10 @@ $texts = [
             }
             .cart-order-btn {
                 width: 100%;
-                padding: 12px 20px;
-                font-size: 1rem;
+                padding: 12px 16px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                border-radius: 6px;
             }
         }
 

@@ -125,6 +125,9 @@ $texts = [
         'qty' => 'Кол-во:',
         'total' => 'Итого:',
         'phone_label' => 'Телефон для связи:',
+        'shop_nav' => 'Магазин',
+        'contact_nav' => 'Контакты',
+        'forum_nav' => 'Форум',
     ],
     'kz' => [
         'shop' => 'Дүкен',
@@ -139,6 +142,9 @@ $texts = [
         'qty' => 'Саны:',
         'total' => 'Жалпы:',
         'phone_label' => 'Байланыс телефоны:',
+        'shop_nav' => 'Дүкен',
+        'contact_nav' => 'Байланыс',
+        'forum_nav' => 'Форум',
     ]
 ];
 ?>
@@ -151,6 +157,12 @@ $texts = [
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
     <style>
         :root {
+            --header-bg: #ff6600;
+            --main-bg: #2a2a2a;
+            --text-white: #ffffff;
+            --text-orange: #ff6600;
+            --text-black: #000000;
+            --border-color: #444444;
             --rusefi-orange: #ff7a1a;
             --rusefi-dark: #232629;
             --rusefi-card: #282b2f;
@@ -160,75 +172,212 @@ $texts = [
         body {
             background: var(--rusefi-dark);
             color: var(--rusefi-text);
-            font-family: 'Inter', Arial, Helvetica, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
+            line-height: 1.6;
         }
         .rusefi-header {
-            background: var(--rusefi-orange);
-            color: #181818;
-            height: 60px;
+            background: var(--header-bg);
+            padding: 15px 36px;
+            position: relative;
+        }
+        .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 36px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .rusefi-logo {
-            font-size: 2.1rem;
-            font-weight: 900;
-            letter-spacing: -2px;
-            color: #181818;
-            font-family: 'Inter', Arial, Helvetica, sans-serif;
-        }
-        .rusefi-header-menu {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-        .rusefi-header-menu a {
-            color: #181818;
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-decoration: none;
-            padding: 0 8px;
-            transition: color 0.18s;
+        .burger-menu {
+            display: none;
+            flex-direction: column;
             cursor: pointer;
+            gap: 4px;
         }
-        .rusefi-header-menu a:hover {
-            color: #fff;
+        .burger-line {
+            width: 24px;
+            height: 2px;
+            background: var(--text-black);
+            transition: 0.3s;
         }
-        .rusefi-cart {
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--header-bg);
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .mobile-menu.open {
+            display: block;
+        }
+        .mobile-nav {
             display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #181818;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .mobile-nav-link {
+            color: var(--text-black);
             text-decoration: none;
-            font-weight: 700;
-            font-size: 1.2rem;
+            font-weight: 500;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .mobile-nav-link:hover {
+            color: var(--text-orange);
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .rusefi-text {
+            color: var(--text-black);
+        }
+        .efi-text {
+            color: var(--text-orange);
+            font-weight: bold;
+            -webkit-text-stroke: 1px var(--text-black);
+            text-stroke: 1px var(--text-black);
+        }
+        .main-nav {
+            display: flex;
+            gap: 30px;
+        }
+        .nav-link {
+            color: var(--text-black);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-black);
+        }
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--text-orange);
+        }
+        .cart-section {
             position: relative;
         }
-        .rusefi-cart svg {
-            width: 28px;
-            height: 28px;
-            fill: none;
-            stroke: #181818;
-            stroke-width: 2;
+        .cart-link {
+            color: var(--text-black);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .rusefi-cart-count {
-            background: #fff;
-            color: #181818;
+        .cart-icon {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: var(--text-black);
+            stroke-width: 1.5;
+        }
+        .cart-count {
+            background: var(--text-orange);
+            color: var(--text-black);
             border-radius: 50%;
-            font-size: 0.95em;
-            font-weight: 700;
-            min-width: 22px;
-            min-height: 22px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            min-width: 18px;
+            min-height: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: absolute;
             top: -8px;
-            right: -12px;
-            border: 2px solid var(--rusefi-orange);
+            right: -8px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .currency-switcher {
+            position: relative;
+        }
+        .currency-switcher select {
+            background: var(--text-black);
+            color: var(--text-white);
+            border: 2px solid var(--text-black);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+            padding-right: 32px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .currency-switcher select:hover {
+            background-color: #333;
+            border-color: var(--text-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .currency-switcher select:focus {
+            outline: none;
+            border-color: var(--text-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+        }
+        .currency-switcher select option {
+            background: var(--text-black);
+            color: var(--text-white);
+            padding: 8px;
+        }
+        .lang-switcher {
+            position: relative;
+        }
+        .lang-switcher select {
+            background: var(--text-black);
+            color: var(--text-white);
+            border: 2px solid var(--text-black);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+            padding-right: 32px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .lang-switcher select:hover {
+            background-color: #333;
+            border-color: var(--text-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .lang-switcher select:focus {
+            outline: none;
+            border-color: var(--text-orange);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
+        }
+        .lang-switcher select option {
+            background: var(--text-black);
+            color: var(--text-white);
+            padding: 8px;
         }
         .rusefi-main {
             max-width: 900px;
@@ -269,6 +418,21 @@ $texts = [
         .order-cart-price { color: var(--rusefi-accent); font-size: 1.1rem; font-weight: 700; }
         .order-cart-desc { color: #e0e0e0; font-size: 1rem; }
         .order-cart-qty { font-size: 1.15rem; font-weight: 600; margin-top: 10px; color: #fff; }
+        .order-cart-remove {
+            background: #232323;
+            color: #ff7a1a;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 22px;
+            border: 2px solid #ff7a1a;
+            margin-left: 24px;
+            transition: background .2s, color .2s;
+            cursor: pointer;
+        }
+        .order-cart-remove:hover {
+            background: #ff7a1a;
+            color: #232323;
+        }
         .order-summary {
             background: var(--rusefi-card);
             border-radius: 12px;
@@ -342,33 +506,175 @@ $texts = [
             .order-cart-info { width: 100%; }
             .order-summary { padding: 12px 8px; font-size: 1.05rem; }
         }
-        @media (max-width: 600px) {
-            .rusefi-header { padding: 0 10px; height: 48px; }
-            .rusefi-logo { font-size: 1.3rem; }
-            .rusefi-title { font-size: 1.5rem; margin-bottom: 18px; }
-            .rusefi-main { padding: 18px 2vw 18px 2vw; }
+        @media (max-width: 768px) {
+            .rusefi-header { padding: 16px 20px; }
+            .main-nav { display: none; }
+            .burger-menu { display: flex; }
+            .header-right { gap: 15px; }
+            .cart-icon { width: 20px; height: 20px; }
+            .currency-switcher select,
+            .lang-switcher select {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                background-image: none;
+                padding-right: 12px;
+            }
+            .rusefi-main { padding: 32px 20px; }
+            .rusefi-title { font-size: 2.2rem; margin-bottom: 32px; }
+            .order-cart-card { padding: 16px; gap: 16px; }
             .order-cart-card img { width: 70px; height: 70px; }
-            .order-form { padding: 12px 8px; max-width: 98vw; }
+            .order-cart-title { font-size: 0.95rem; }
+            .order-cart-price { font-size: 0.85rem; }
+            .order-cart-qty { font-size: 1.1rem; }
+            .order-summary { padding: 16px; font-size: 1.1rem; }
+            .order-form { padding: 24px 20px; max-width: 90vw; }
             .order-form input, .order-form label { font-size: 1rem; }
             .order-back-btn { width: 100%; margin-top: 10px; }
+        }
+
+        @media (max-width: 480px) {
+            .rusefi-header { padding: 12px 16px; }
+            .rusefi-logo { font-size: 1.5rem; }
+            .main-nav { display: none; }
+            .nav-link { font-size: 0.9rem; }
+            .header-right { gap: 10px; }
+            .cart-icon { width: 18px; height: 18px; }
+            .currency-switcher select,
+            .lang-switcher select {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
+            }
+            .rusefi-main { padding: 24px 16px; }
+            .rusefi-title { font-size: 1.8rem; margin-bottom: 24px; }
+            .order-cart-list { gap: 20px; }
+            .order-cart-card {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px;
+                gap: 12px;
+                border-radius: 8px;
+            }
+            .order-cart-card img { width: 80px; height: 80px; align-self: center; }
+            .order-cart-info { width: 100%; text-align: center; }
+            .order-cart-title { font-size: 0.9rem; margin-bottom: 6px; }
+            .order-cart-price { font-size: 0.8rem; margin-bottom: 8px; }
+            .order-cart-qty { font-size: 1rem; margin-top: 8px; }
+            .order-cart-remove { width: 100%; margin-top: 12px; margin-left: 0; }
+            .order-summary {
+                padding: 16px;
+                font-size: 1rem;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .order-form { padding: 16px 16px; max-width: 95vw; }
+            .order-form input, .order-form label { font-size: 0.95rem; }
+            .order-back-btn { width: 100%; margin-top: 10px; }
+        }
+
+        /* Small mobile styles */
+        @media (max-width: 360px) {
+            .rusefi-header { padding: 10px 12px; }
+            .rusefi-logo { font-size: 1.3rem; }
+            .main-nav { gap: 10px; }
+            .nav-link { font-size: 0.8rem; }
+            .header-right { gap: 8px; }
+            .currency-switcher select,
+            .lang-switcher select {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+                background-image: none;
+                padding-right: 10px;
+            }
+            .rusefi-main { padding: 20px 12px; }
+            .rusefi-title { font-size: 1.6rem; margin-bottom: 20px; }
+            .order-cart-card { padding: 12px; }
+            .order-cart-card img { width: 70px; height: 70px; }
+            .order-cart-title { font-size: 0.85rem; }
+            .order-cart-price { font-size: 0.75rem; }
+            .order-cart-qty { font-size: 0.9rem; }
+            .order-summary { padding: 12px; font-size: 0.95rem; }
+            .order-form { padding: 12px 12px; max-width: 98vw; }
+            .order-form input, .order-form label { font-size: 0.9rem; }
+            .order-back-btn { width: 100%; margin-top: 10px; }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .cart-icon { width: 24px; height: 24px; }
+            .order-form .btn-primary { min-height: 48px; }
+            .order-back-btn { min-height: 48px; }
+        }
+
+        /* Landscape orientation for mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .rusefi-header { padding: 8px 16px; }
+            .rusefi-main { padding: 16px; }
+            .order-cart-card {
+                flex-direction: row;
+                align-items: center;
+                padding: 12px;
+            }
+            .order-cart-card img { width: 60px; height: 60px; align-self: auto; }
+            .order-cart-info { width: auto; flex: 1; text-align: left; }
+            .order-cart-qty { margin-top: 0; }
         }
     </style>
 </head>
 <body>
     <header class="rusefi-header">
-        <span class="rusefi-logo">rusEFI</span>
-        <nav class="rusefi-header-menu">
-            <a href="index.php"><?= $texts[$lang]['shop'] ?></a>
-            <a href="#footer-contacts" id="contacts-link"><?= $texts[$lang]['contacts'] ?></a>
+        <div class="header-content">
+            <div class="logo">
+                <span class="rusefi-text">rus</span><span class="efi-text">EFI</span>
+            </div>
+        <nav class="main-nav">
+            <a href="index.php" class="nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
+            <a href="#" class="nav-link"> <?= $texts[$lang]['contact_nav'] ?></a>
+            <a href="forum.php" class="nav-link"> <?= $texts[$lang]['forum_nav'] ?></a>
         </nav>
-        <div style="display:flex;align-items:center;gap:8px;">
-            <form method="get" style="margin:0;padding:0;">
-                <button type="submit" name="lang" value="<?= $lang==='ru'?'kz':'ru' ?>" style="background:none;border:none;color:#181818;font-size:1.1rem;cursor:pointer;text-decoration:none;outline:none;box-shadow:none;"> <?= $lang==='ru'?'Рус':'Қаз' ?> </button>
-            </form>
-            <a href="cart.php" class="rusefi-cart">
-                <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                <span id="cart-count" class="rusefi-cart-count">0</span>
-            </a>
+            <div class="header-right">
+                <div class="currency-switcher">
+                    <form method="get" style="margin:0;padding:0;display:inline;">
+                        <select name="currency" onchange="this.form.submit()">
+                            <option value="KZT" <?= $currency == 'KZT' ? 'selected' : '' ?>>KZT</option>
+                            <option value="RUB" <?= $currency == 'RUB' ? 'selected' : '' ?>>RUB</option>
+                            <option value="USD" <?= $currency == 'USD' ? 'selected' : '' ?>>USD</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="lang-switcher">
+                    <form method="get" style="margin:0;padding:0;display:inline;">
+                        <select name="lang" onchange="this.form.submit()">
+                            <option value="ru" <?= $lang == 'ru' ? 'selected' : '' ?>>RU</option>
+                            <option value="kz" <?= $lang == 'kz' ? 'selected' : '' ?>>KZ</option>
+                            <option value="en" <?= $lang == 'en' ? 'selected' : '' ?>>EN</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="cart-section">
+                    <a href="cart.php" class="cart-link">
+                        <svg viewBox="0 0 24 24" class="cart-icon">
+                            <circle cx="9" cy="21" r="1"/>
+                            <circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg>
+                        <span id="cart-count" class="cart-count">0</span>
+                    </a>
+                </div>
+                <div class="burger-menu" onclick="toggleMobileMenu()">
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                </div>
+            </div>
+        </div>
+        <div class="mobile-menu" id="mobile-menu">
+            <nav class="mobile-nav">
+                <a href="index.php" class="mobile-nav-link"> <?= $texts[$lang]['shop_nav'] ?></a>
+                <a href="#" class="mobile-nav-link" onclick="document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'}); toggleMobileMenu();"> <?= $texts[$lang]['contact_nav'] ?></a>
+                <a href="forum.php" class="mobile-nav-link"> <?= $texts[$lang]['forum_nav'] ?></a>
+            </nav>
         </div>
     </header>
     <main class="rusefi-main">
@@ -410,8 +716,8 @@ $texts = [
     const currency = "<?= $currency ?>";
     const exchangeRates = <?php echo json_encode($exchange_rates); ?>;
     const texts = {
-        ru: { empty_cart: "Корзина пуста.", qty: "Кол-во:", total: "Итого:" },
-        kz: { empty_cart: "Себет бос.", qty: "Саны:", total: "Жалпы:" }
+        ru: { empty_cart: "Корзина пуста.", qty: "Кол-во:", total: "Итого:", remove: "Удалить" },
+        kz: { empty_cart: "Себет бос.", qty: "Саны:", total: "Жалпы:", remove: "Жою" }
     };
     const products = <?php echo json_encode(array_values($products), JSON_UNESCAPED_UNICODE); ?>;
     function getCart() { return JSON.parse(localStorage.getItem('cart') || '{}'); }
@@ -432,14 +738,16 @@ $texts = [
                 // Мультиязычность для name/description
                 let name = item?.name || (typeof p.name === 'object' ? (p.name[lang] || p.name['ru'] || '') : p.name);
                 let desc = typeof p.description === 'object' ? (p.description[lang] || p.description['ru'] || '') : (p.description || '');
+                // Get first image from gallery
+                const firstImage = Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : (p.img || '');
                 html += `<div class='order-cart-card'>
-                    <img src='${p.img}' alt='${name}'>
+                    <img src='${firstImage}' alt='${name}'>
                     <div class='order-cart-info'>
                         <div class='order-cart-title'>${name}</div>
                         <div class='order-cart-price'>${formatPrice(price, currency)}</div>
-                        <div class='order-cart-desc'>${desc}</div>
                         <div class='order-cart-qty'>${texts[lang].qty} ${qty}</div>
                     </div>
+                    <button class='order-cart-remove' data-id='${p.id}'>${texts[lang].remove}</button>
                 </div>`;
             }
         });
@@ -450,6 +758,17 @@ $texts = [
             document.getElementById('order-form').style.display = 'none';
         }
         document.getElementById('order-cart').innerHTML = html;
+        // Add event listeners for remove buttons
+        document.querySelectorAll('.order-cart-remove').forEach(btn => {
+            btn.onclick = function() {
+                const id = this.getAttribute('data-id');
+                const cart = getCart();
+                delete cart[id];
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderOrderCart();
+                updateCartUI();
+            };
+        });
     }
     function prepareOrderForm() {
         const cart = getCart();
@@ -479,6 +798,10 @@ $texts = [
             document.getElementById('footer-contacts').scrollIntoView({behavior: 'smooth'});
         };
     });
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('open');
+    }
     window.addEventListener('storage', function() { renderOrderCart(); updateCartUI(); });
     </script>
 </body>
