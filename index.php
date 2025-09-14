@@ -111,7 +111,7 @@ $texts = [
         'uaefi_boards' => 'uaEFI платы',
         'shop_nav' => 'Магазин',
         'contact_nav' => 'Контакты',
-        'forum_nav' => 'Форум',
+        'forum_nav' => 'Мануал',
     ],
     'kz' => [
         'shop' => 'Дүкен',
@@ -125,7 +125,7 @@ $texts = [
         'uaefi_boards' => 'uaEFI тақталары',
         'shop_nav' => 'Дүкен',
         'contact_nav' => 'Байланыс',
-        'forum_nav' => 'Форум',
+        'forum_nav' => 'Нұсқаулық',
     ],
     'en' => [
         'shop' => 'Shop',
@@ -139,7 +139,7 @@ $texts = [
         'uaefi_boards' => 'uaEFI Boards',
         'shop_nav' => 'Shop',
         'contact_nav' => 'Contact',
-        'forum_nav' => 'Forum',
+        'forum_nav' => 'Manual',
     ]
 ];
 $products = [];
